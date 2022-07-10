@@ -9,7 +9,7 @@
             "type": "php",
             "request": "launch",
             "port": 9000,
-            "hostname": "localhost"
+            "hostname": "51.91.197.3"
         },
         {
             "name": "Launch currently open script",

@@ -1,0 +1,4 @@
+# Dolibarr language file - fr_FR - convertprice
+CHARSET=UTF-8
+Module105001Name=Convert Price
+Module105001Desc=Afficher et convertir facilement le prix TTC en HT sur les lignes de propositions commerciales, commandes clients ou factures clients.

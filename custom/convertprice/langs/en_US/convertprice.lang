@@ -1,0 +1,4 @@
+# Dolibarr language file - fr_FR - convertprice
+CHARSET=UTF-8
+Module105001Name=Convert price
+Module105001Desc=Easily display and convert the price incl.

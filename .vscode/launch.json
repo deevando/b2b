@@ -11,7 +11,7 @@
             "port": 9000,
             "hostname": "51.91.197.3",
             "pathMappings": {
-                "/var/www/vhost/deevando.com/": "${workspaceFolder}/",
+                "/var/www/site": "${workspaceFolder}/",
               }
         },
         {

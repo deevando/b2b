@@ -376,6 +376,7 @@ if (!empty($conf->global->ACCOUNTING_DATE_START_BINDING)) {
 }
 $sql .= " AND f.fk_statut > 0";
 $sql .= " AND fd.product_type <= 2";
+$sql .= " AND (f.close_code IS NULL OR f.close_code != '".Facture::CLOSECODE_REPLACED."')";
 $sql .= " AND f.entity IN (".getEntity('invoice', 0).")"; // We don't share object for accountancy
 $sql .= " AND aa.account_number IS NULL";
 if (!empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) {
@@ -492,6 +493,7 @@ if (!empty($conf->global->ACCOUNTING_DATE_START_BINDING)) {
 }
 $sql .= " AND f.entity IN (".getEntity('invoice', 0).")"; // We don't share object for accountancy
 $sql .= " AND f.fk_statut > 0";
+$sql .= " AND (f.close_code IS NULL OR f.close_code != '".Facture::CLOSECODE_REPLACED."')";
 $sql .= " AND fd.product_type <= 2";
 if (!empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) {
 	$sql .= " AND f.type IN (".Facture::TYPE_STANDARD.", ".Facture::TYPE_REPLACEMENT.", ".Facture::TYPE_CREDIT_NOTE.", ".Facture::TYPE_SITUATION.")";
@@ -592,6 +594,7 @@ if ($conf->global->MAIN_FEATURES_LEVEL > 0) { // This part of code looks strange
 	}
 	$sql .= " AND f.entity IN (".getEntity('invoice', 0).")"; // We don't share object for accountancy
 	$sql .= " AND f.fk_statut > 0";
+	$sql .= " AND (f.close_code IS NULL OR f.close_code != '".Facture::CLOSECODE_REPLACED."')";
 	$sql .= " AND fd.product_type <= 2";
 	if (!empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) {
 		$sql .= " AND f.type IN (".Facture::TYPE_STANDARD.", ".Facture::TYPE_REPLACEMENT.", ".Facture::TYPE_CREDIT_NOTE.", ".Facture::TYPE_SITUATION.")";
@@ -659,6 +662,7 @@ if ($conf->global->MAIN_FEATURES_LEVEL > 0) { // This part of code looks strange
 		}
 		$sql .= " AND f.entity IN (".getEntity('invoice', 0).")"; // We don't share object for accountancy
 		$sql .= " AND f.fk_statut > 0";
+		$sql .= " AND (f.close_code IS NULL OR f.close_code != '".Facture::CLOSECODE_REPLACED."')";
 		$sql .= " AND fd.product_type <= 2";
 		if (!empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) {
 			$sql .= " AND f.type IN (".Facture::TYPE_STANDARD.", ".Facture::TYPE_REPLACEMENT.", ".Facture::TYPE_CREDIT_NOTE.", ".Facture::TYPE_SITUATION.")";

@@ -1,0 +1,23 @@
+-------------------------------------
+   TOTP2FA MODULE CHANGELOG
+-------------------------------------
+
+## v 1.5 [2022-04-18]
+- Added the ability to REMEMBER a device and not ask the TOTP during X time (1 day/week/month), for a certain user.
+
+## v 1.4 [2022-03-13]
+- Bugfixed an UI interface on user card.
+- Added an access filter by the country to which the visitor's IP belongs (optional, and it requires php7.4-geoip)
+
+## v 1.3 [2022-03-07]
+- Upgraded to be compatible with Dolibarr 15.X
+
+## v 1.2 [2022-02-10]
+- New: when the user is activating the 2FA, now she can set her own TOTP secret key. In this way is alot more easier to use the same secret on several Dolibarr instances, which is specially useful when you works as administrator.
+
+## v 1.1 [2022-02-07]
+- Bugfixed translations on English and German. Thanks to Chris Keydel.
+
+## v 1.0 [2022-02-02]
+- Initial version. Compatible from Dolibarr 7.X to 14.X
+

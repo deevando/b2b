@@ -1,0 +1,48 @@
+# Dolibarr language file - de_DE - totp2fa
+CHARSET= UTF-8
+
+# Module label
+Module570004Name = TOTP 2FA
+ModuleTotp2FaName = TOTP 2FA
+
+# Module description
+ModuleTotp2FaDesc = Zwei-Faktor-Authentifizierung
+
+# Version 1.0
+totp2fa_Secret = Schlüssel TOTP 2FA
+totp2fa_Enable = Aktivieren
+totp2fa_Disable = Deaktivieren
+totp2fa_NotYet = Noch nicht aktiviert.
+totp2fa_6digit = 6-stelliger Code...
+totp2fa_WrongCode = Der 6-stellige Code ist falsch.
+totp2fa_NeedPerms = Um 2FA zu aktivieren/deaktivieren, benötigen Sie die Berechtigung zum Ändern Ihres Benutzernamens und Passworts.
+totp2fa_SaveChanges = Änderungen bitte SPEICHERN.
+totp2fa_Instructions = Um die 2FA-Authentifizierung für Ihr Konto zu aktivieren, müssen Sie nun Ihren TOTP-Codegenerator (Time-Based One-Time-Password) - normalerweise eine Smartphone-App - mit diesem geheimen Schlüssel konfigurieren und einen 6-stelligen Code generieren, um ihn nachfolgend zu bestätigen:
+totp2fa_Validate = Bestätigen
+totp2fa_TryAgain = Falscher Code, bitte versuchen Sie es noch einmal.
+totp2fa_Config = Einstellungen
+totp2fa_About = Über uns
+totp2fa_AboutInfo=Dieses Modul wird von Sergi Rodrigues (caos30) für IMASDEWEB entwickelt und vertrieben, <a href="https://imasdeweb.com">imasdeweb.com</a> (ein zukünftiges Dolibarr Preferred Partner Unternehmen ;o).
+totp2fa_MoreModules=Andere Module desselben Autors sind im offiziellen Store erhältlich <a target="_blank" href="http://www.dolistore.com/search.php?search_query=%s">Dolistore</a>
+totp2fa_Config01 = Damit dieses Modul richtig funktioniert, benötigen Sie:
+totp2fa_Config01A = Stellen Sie sicher, dass die Uhr Ihres Servers synchronisiert ist.
+totp2fa_Config01B = Erteilen Sie Benutzern Berechtigungen zum 1) Ändern ihrer Benutzerdatei, 2) Ändern ihres Kennworts.
+totp2fa_Config02 = Einige beliebte Codegeneratoren für Benutzergeräte:
+
+# Version 1.4
+totp2fa_Config03 = Nach Land filtern
+totp2fa_Config04 = {library_name} muss auf dem Server installiert sein 
+totp2fa_Config05 = Zugriff auf IPs aus diesen Ländern zulassen:
+totp2fa_Config06 = Alle Länder.
+totp2fa_Config07 = Addieren
+totp2fa_WrongCountry = Der Zugriff aus Ihrem Land ist nicht erlaubt.
+
+# Version 1.5
+totp2fa_Config08 = Einstellungen
+totp2fa_Config09 = Wie oft der TOTp-Code im selben Browser angefordert werden soll
+totp2fa_Config09_msg1 = Sie werden auf diesem Gerät nicht zur Eingabe des 6-stelligen Codes für {period} aufgefordert.
+totp2fa_Config09_msg2 = Solange Sie keine COOKIES löschen und nicht im INCOGNITO-Modus surfen.
+totp2fa_Config09_opt_1d = 1 Tag
+totp2fa_Config09_opt_1w = 1 Woche
+totp2fa_Config09_opt_1m = 1 Monat
+totp2fa_Config09_opt_0 = immer

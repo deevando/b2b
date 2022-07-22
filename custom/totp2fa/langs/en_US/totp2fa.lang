@@ -1,0 +1,48 @@
+# Dolibarr language file - en_US - totp2fa
+CHARSET= UTF-8
+
+# Module label
+Module570004Name = TOTP 2FA
+ModuleTotp2FaName = TOTP 2FA
+
+# Module description
+totp2faDescription = Two-factor authentication
+
+# Version 1.0
+totp2fa_Secret = TOTP 2FA secret
+totp2fa_Enable = Enable
+totp2fa_Disable = Disable
+totp2fa_NotYet = Not enabled yet.
+totp2fa_6digit = 6 digit code...
+totp2fa_WrongCode = Wrong 6 digits code.
+totp2fa_NeedPerms = To enable/disable 2FA you need permission to modify your user data & password.
+totp2fa_SaveChanges = Please SAVE CHANGES.
+totp2fa_Instructions = To activate 2FA authentication on your account you must now configure your TOTP (Time-Based One-Time-Password) code generator (usually mobile app) with this secret key and generate a 6-digit code to validate it below:
+totp2fa_Validate = Validate
+totp2fa_TryAgain = Not valid code. Try again.
+totp2fa_Config = Settings
+totp2fa_About = About
+totp2fa_AboutInfo = This module is developed and distributed by Sergi Rodrigues (caos30) for IMASDEWEB, <a href="https://imasdeweb.com">imasdeweb.com</a> (soon a Dolibarr Preferred Partner ;o).
+totp2fa_MoreModules = Other modules of the same author are available in the official store <a target="_blank" href="http://www.dolistore.com/search.php?search_query=%s">Dolistore</a>
+totp2fa_Config01 = To correctly run this module you only need:
+totp2fa_Config01A = Make sure your server has its clock in sync.
+totp2fa_Config01B = Give permissions to users to 1) modify her user data, 2) modify her password.
+totp2fa_Config02 = Some popular compatible code generators for the users devices:
+
+# Version 1.4
+totp2fa_Config03 = Filter by country
+totp2fa_Config04 = It is necessary to have the {library_name} library installed on the server 
+totp2fa_Config05 = Allow access to IPs from these countries:
+totp2fa_Config06 = All the countries.
+totp2fa_Config07 = Add
+totp2fa_WrongCountry = Access from your country is not allowed.
+
+# Version 1.5
+totp2fa_Config08 = Settings
+totp2fa_Config09 = How often to request the TOTp code in the same browser
+totp2fa_Config09_msg1 = You will not be prompted for the 6-digit code for {period} on this device.
+totp2fa_Config09_msg2 = As long as you don't delete COOKIES and don't browse in INCOGNITO mode.
+totp2fa_Config09_opt_1d = 1 day
+totp2fa_Config09_opt_1w = 1 week
+totp2fa_Config09_opt_1m = 1 month
+totp2fa_Config09_opt_0 = always

@@ -643,14 +643,22 @@ if ($conf->global->MAIN_FEATURES_LEVEL > 0) { // This part of code looks strange
 				$j -= 12;
 			}
 			$sql .= " SUM(".$db->ifsql("MONTH(f.datef)=".$j,
+								" (".$db->ifsql("f.type=2",
+									" (".$db->ifsql("fd.total_ht <= 0",
+										"(-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
+										"(fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").")",
+									" (".$db->ifsql("fd.total_ht < 0",
+										"(-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
+										"(fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").")",).")",
+								0).") AS month".str_pad($j, 2, '0', STR_PAD_LEFT).",";
+						}
+						$sql .= " SUM(".$db->ifsql("f.type=2",
+						" (".$db->ifsql("fd.total_ht <= 0",
+							"(-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
+							"(fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").")",
 						" (".$db->ifsql("fd.total_ht < 0",
-							" (-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
-							"  (fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").")",
-						 0).") AS month".str_pad($j, 2, '0', STR_PAD_LEFT).",";
-		}
-		$sql .= "  SUM(".$db->ifsql("fd.total_ht < 0",
-							" (-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
-							"  (fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").") as total";
+							"(-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
+							"(fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").")",).") AS total";
 
 		$sql .= " FROM ".MAIN_DB_PREFIX."facturedet as fd";
 		$sql .= "  LEFT JOIN ".MAIN_DB_PREFIX."facture as f ON f.rowid = fd.fk_facture";

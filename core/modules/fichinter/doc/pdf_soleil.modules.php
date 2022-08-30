@@ -149,6 +149,7 @@ class pdf_soleil extends ModelePDFFicheinter
 		$this->option_codeproduitservice = 0; // Display product-service code
 		$this->option_multilang = 1; // Available in several languages
 		$this->option_draft_watermark = 1; // Support add of a watermark on drafts
+		$this->watermark = '';
 
 		// Get source company
 		$this->emetteur = $mysoc;
@@ -187,6 +188,11 @@ class pdf_soleil extends ModelePDFFicheinter
 
 		// Load traductions files required by page
 		$outputlangs->loadLangs(array("main", "interventions", "dict", "companies"));
+
+		// Show Draft Watermark
+		if ($object->statut == $object::STATUS_DRAFT && (!empty($conf->global->FICHINTER_DRAFT_WATERMARK))) {
+			$this->watermark = $conf->global->FICHINTER_DRAFT_WATERMARK;
+		}
 
 		if ($conf->ficheinter->dir_output) {
 			$object->fetch_thirdparty();
@@ -413,6 +419,9 @@ class pdf_soleil extends ModelePDFFicheinter
 							if (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)) {
 								$this->_pagehead($pdf, $object, 0, $outputlangs);
 							}
+							if (!empty($tplidx)) {
+								$pdf->useTemplate($tplidx);
+							}
 						}
 						if (isset($object->lines[$i + 1]->pagebreak) && $object->lines[$i + 1]->pagebreak) {
 							if ($pagenb == 1) {
@@ -560,11 +569,6 @@ class pdf_soleil extends ModelePDFFicheinter
 		$outputlangs->loadLangs(array("main", "dict", "companies", "interventions"));
 
 		pdf_pagehead($pdf, $outputlangs, $this->page_hauteur);
-
-		//Affiche le filigrane brouillon - Print Draft Watermark
-		if ($object->statut == 0 && (!empty($conf->global->FICHINTER_DRAFT_WATERMARK))) {
-			pdf_watermark($pdf, $outputlangs, $this->page_hauteur, $this->page_largeur, 'mm', $conf->global->FICHINTER_DRAFT_WATERMARK);
-		}
 
 		//Prepare next
 		$pdf->SetTextColor(0, 0, 60);
@@ -732,6 +736,6 @@ class pdf_soleil extends ModelePDFFicheinter
 	{
 		global $conf;
 		$showdetails = empty($conf->global->MAIN_GENERATE_DOCUMENTS_SHOW_FOOT_DETAILS) ? 0 : $conf->global->MAIN_GENERATE_DOCUMENTS_SHOW_FOOT_DETAILS;
-		return pdf_pagefoot($pdf, $outputlangs, 'FICHINTER_FREE_TEXT', $this->emetteur, $this->marge_basse, $this->marge_gauche, $this->page_hauteur, $object, $showdetails, $hidefreetext);
+		return pdf_pagefoot($pdf, $outputlangs, 'FICHINTER_FREE_TEXT', $this->emetteur, $this->marge_basse, $this->marge_gauche, $this->page_hauteur, $object, $showdetails, $hidefreetext, $this->page_largeur, $this->watermark);
 	}
 }

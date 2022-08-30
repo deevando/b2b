@@ -1,9 +1,9 @@
 <?php
-/* Copyright (C) 2013       Olivier Geffroy		<jeff@jeffinfo.com>
- * Copyright (C) 2013-2014  Florian Henry		<florian.henry@open-concept.pro>
- * Copyright (C) 2013-2021  Alexandre Spangaro	<aspangaro@open-dsi.fr>
- * Copyright (C) 2014       Juanjo Menent		<jmenent@2byte.es>
- * Copyright (C) 2015       Jean-François Ferry	<jfefe@aternatik.fr>
+/* Copyright (C) 2013       Olivier Geffroy     <jeff@jeffinfo.com>
+ * Copyright (C) 2013-2014  Florian Henry       <florian.henry@open-concept.pro>
+ * Copyright (C) 2013-2022  Alexandre Spangaro  <aspangaro@open-dsi.fr>
+ * Copyright (C) 2014       Juanjo Menent       <jmenent@2byte.es>
+ * Copyright (C) 2015       Jean-François Ferry <jfefe@aternatik.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -174,7 +174,9 @@ if ($action == 'validatehistory') {
 	$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."accounting_account as aa2 ON " . $alias_product_perentity . ".accountancy_code_sell_intra = aa2.account_number  AND aa2.active = 1 AND aa2.fk_pcg_version = '".$db->escape($chartaccountcode)."' AND aa2.entity = ".$conf->entity;
 	$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."accounting_account as aa3 ON " . $alias_product_perentity . ".accountancy_code_sell_export = aa3.account_number AND aa3.active = 1 AND aa3.fk_pcg_version = '".$db->escape($chartaccountcode)."' AND aa3.entity = ".$conf->entity;
 	$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."accounting_account as aa4 ON " . $alias_societe_perentity . ".accountancy_code_sell = aa4.account_number        AND aa4.active = 1 AND aa4.fk_pcg_version = '".$db->escape($chartaccountcode)."' AND aa4.entity = ".$conf->entity;
-	$sql .= " WHERE f.fk_statut > 0 AND l.fk_code_ventilation <= 0 AND l.product_type <= 2 AND f.entity = ".((int) $conf->entity);
+	$sql .= " WHERE f.fk_statut > 0 AND l.fk_code_ventilation <= 0";
+	$sql .= " AND l.product_type <= 2";
+	$sql .= " AND f.entity IN (".getEntity('invoice', 0).")"; // We don't share object for accountancy
 	if (!empty($conf->global->ACCOUNTING_DATE_START_BINDING)) {
 		$sql .= " AND f.datef >= '".$db->idate($conf->global->ACCOUNTING_DATE_START_BINDING)."'";
 	}
@@ -376,7 +378,6 @@ if (!empty($conf->global->ACCOUNTING_DATE_START_BINDING)) {
 }
 $sql .= " AND f.fk_statut > 0";
 $sql .= " AND fd.product_type <= 2";
-$sql .= " AND (f.close_code IS NULL OR f.close_code != '".Facture::CLOSECODE_REPLACED."')";
 $sql .= " AND f.entity IN (".getEntity('invoice', 0).")"; // We don't share object for accountancy
 $sql .= " AND aa.account_number IS NULL";
 if (!empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) {
@@ -493,7 +494,6 @@ if (!empty($conf->global->ACCOUNTING_DATE_START_BINDING)) {
 }
 $sql .= " AND f.entity IN (".getEntity('invoice', 0).")"; // We don't share object for accountancy
 $sql .= " AND f.fk_statut > 0";
-$sql .= " AND (f.close_code IS NULL OR f.close_code != '".Facture::CLOSECODE_REPLACED."')";
 $sql .= " AND fd.product_type <= 2";
 if (!empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) {
 	$sql .= " AND f.type IN (".Facture::TYPE_STANDARD.", ".Facture::TYPE_REPLACEMENT.", ".Facture::TYPE_CREDIT_NOTE.", ".Facture::TYPE_SITUATION.")";
@@ -594,7 +594,6 @@ if ($conf->global->MAIN_FEATURES_LEVEL > 0) { // This part of code looks strange
 	}
 	$sql .= " AND f.entity IN (".getEntity('invoice', 0).")"; // We don't share object for accountancy
 	$sql .= " AND f.fk_statut > 0";
-	$sql .= " AND (f.close_code IS NULL OR f.close_code != '".Facture::CLOSECODE_REPLACED."')";
 	$sql .= " AND fd.product_type <= 2";
 	if (!empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) {
 		$sql .= " AND f.type IN (".Facture::TYPE_STANDARD.", ".Facture::TYPE_REPLACEMENT.", ".Facture::TYPE_CREDIT_NOTE.", ".Facture::TYPE_SITUATION.")";
@@ -643,22 +642,14 @@ if ($conf->global->MAIN_FEATURES_LEVEL > 0) { // This part of code looks strange
 				$j -= 12;
 			}
 			$sql .= " SUM(".$db->ifsql("MONTH(f.datef)=".$j,
-								" (".$db->ifsql("f.type=2",
-									" (".$db->ifsql("fd.total_ht <= 0",
-										"(-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
-										"(fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").")",
-									" (".$db->ifsql("fd.total_ht < 0",
-										"(-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
-										"(fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").")",).")",
-								0).") AS month".str_pad($j, 2, '0', STR_PAD_LEFT).",";
-						}
-						$sql .= " SUM(".$db->ifsql("f.type=2",
-						" (".$db->ifsql("fd.total_ht <= 0",
-							"(-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
-							"(fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").")",
 						" (".$db->ifsql("fd.total_ht < 0",
-							"(-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
-							"(fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").")",).") AS total";
+							" (-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
+							"  (fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").")",
+						 0).") AS month".str_pad($j, 2, '0', STR_PAD_LEFT).",";
+		}
+		$sql .= "  SUM(".$db->ifsql("fd.total_ht < 0",
+							" (-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
+							"  (fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").") as total";
 
 		$sql .= " FROM ".MAIN_DB_PREFIX."facturedet as fd";
 		$sql .= "  LEFT JOIN ".MAIN_DB_PREFIX."facture as f ON f.rowid = fd.fk_facture";
@@ -670,7 +661,6 @@ if ($conf->global->MAIN_FEATURES_LEVEL > 0) { // This part of code looks strange
 		}
 		$sql .= " AND f.entity IN (".getEntity('invoice', 0).")"; // We don't share object for accountancy
 		$sql .= " AND f.fk_statut > 0";
-		$sql .= " AND (f.close_code IS NULL OR f.close_code != '".Facture::CLOSECODE_REPLACED."')";
 		$sql .= " AND fd.product_type <= 2";
 		if (!empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) {
 			$sql .= " AND f.type IN (".Facture::TYPE_STANDARD.", ".Facture::TYPE_REPLACEMENT.", ".Facture::TYPE_CREDIT_NOTE.", ".Facture::TYPE_SITUATION.")";

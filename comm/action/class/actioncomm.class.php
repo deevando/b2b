@@ -1127,8 +1127,16 @@ class ActionComm extends CommonObject
 		$sql = "UPDATE ".MAIN_DB_PREFIX."actioncomm ";
 		$sql .= " SET percent = '".$this->db->escape($this->percentage)."'";
 		if ($this->type_id > 0) {
-			$sql .= ", fk_action = '".$this->db->escape($this->type_id)."'";
+			$sql .= ", fk_action = ".(int) $this->type_id;
+			if (empty($this->type_code)) {
+				$cactioncomm = new CActionComm($this->db);
+				$result = $cactioncomm->fetch($this->type_id);
+				if ($result >= 0 && !empty($cactioncomm->code)) {
+					$this->type_code = $cactioncomm->code;
+				}
+			}
 		}
+		$sql .= ", code = " . (isset($this->type_code)? "'".$this->db->escape($this->type_code) . "'":"null");
 		$sql .= ", label = ".($this->label ? "'".$this->db->escape($this->label)."'" : "null");
 		$sql .= ", datep = ".(strval($this->datep) != '' ? "'".$this->db->idate($this->datep)."'" : 'null');
 		$sql .= ", datep2 = ".(strval($this->datef) != '' ? "'".$this->db->idate($this->datef)."'" : 'null');
@@ -2057,8 +2065,8 @@ class ActionComm extends CommonObject
 						}
 
 						if (!empty($conf->global->AGENDA_EXPORT_FIX_TZ)) {
-							$timestampStart = - ($conf->global->AGENDA_EXPORT_FIX_TZ * 3600);
-							$timestampEnd   = - ($conf->global->AGENDA_EXPORT_FIX_TZ * 3600);
+							$timestampStart = $timestampStart - ($conf->global->AGENDA_EXPORT_FIX_TZ * 3600);
+							$timestampEnd   = $timestampEnd - ($conf->global->AGENDA_EXPORT_FIX_TZ * 3600);
 						}
 
 						$urlwithouturlroot = preg_replace('/'.preg_quote(DOL_URL_ROOT, '/').'$/i', '', trim($dolibarr_main_url_root));

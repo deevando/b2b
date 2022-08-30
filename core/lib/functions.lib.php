@@ -315,7 +315,7 @@ function dol_shutdown()
 		$depth = $db->transaction_opened;
 		$disconnectdone = $db->close();
 	}
-	dol_syslog("--- End access to ".$_SERVER["PHP_SELF"].(($disconnectdone && $depth) ? ' (Warn: db disconnection forced, transaction depth was '.$depth.')' : ''), (($disconnectdone && $depth) ?LOG_WARNING:LOG_INFO));
+	dol_syslog("--- End access to ".$_SERVER["PHP_SELF"].(($disconnectdone && $depth) ? ' (Warn: db disconnection forced, transaction depth was '.$depth.')' : ''), (($disconnectdone && $depth) ? LOG_WARNING : LOG_INFO));
 }
 
 /**
@@ -682,7 +682,7 @@ function GETPOST($paramname, $check = 'alphanohtml', $method = 0, $filter = null
 			// - posted value not empty, or
 			// - if posted value is empty and a default value exists that is not empty (it means we did a filter to an empty value when default was not).
 
-			if ($out != '') {		// $out = '0' or 'abc', it is a search criteria to keep
+			if ($out != '' && isset($user)) {// $out = '0' or 'abc', it is a search criteria to keep
 				$user->lastsearch_values_tmp[$relativepathstring][$paramname] = $out;
 			}
 		}
@@ -2203,7 +2203,7 @@ function dol_bc($var, $moreclass = '')
  */
 function dol_format_address($object, $withcountry = 0, $sep = "\n", $outputlangs = '', $mode = 0, $extralangcode = '')
 {
-	global $conf, $langs;
+	global $conf, $langs, $hookmanager;
 
 	$ret = '';
 	$countriesusingstate = array('AU', 'CA', 'US', 'IN', 'GB', 'ES', 'UK', 'TR', 'CN'); // See also MAIN_FORCE_STATE_INTO_ADDRESS
@@ -2268,6 +2268,14 @@ function dol_format_address($object, $withcountry = 0, $sep = "\n", $outputlangs
 	if ($withcountry) {
 		$langs->load("dict");
 		$ret .= (empty($object->country_code) ? '' : ($ret ? $sep : '').$outputlangs->convToOutputCharset($outputlangs->transnoentitiesnoconv("Country".$object->country_code)));
+	}
+	if ($hookmanager) {
+		$parameters = array('withcountry' => $withcountry, 'sep' => $sep, 'outputlangs' => $outputlangs,'mode' => $mode, 'extralangcode' => $extralangcode);
+		$reshook = $hookmanager->executeHooks('formatAddress', $parameters, $object);
+		if ($reshook > 0) {
+			$ret = '';
+		}
+		$ret .= $hookmanager->resPrint;
 	}
 
 	return $ret;
@@ -5179,9 +5187,10 @@ function print_fleche_navigation($page, $file, $options = '', $nextpage = 0, $be
  *  @param	boolean	$addpercent		Add a percent % sign in output
  *	@param	int		$info_bits		Miscellaneous information on vat (0=Default, 1=French NPR vat)
  *	@param	int		$usestarfornpr	-1=Never show, 0 or 1=Use '*' for NPR vat rates
+ *  @param	int		$html			Used for html output
  *  @return	string					String with formated amounts ('19,6' or '19,6%' or '8.5% (NPR)' or '8.5% *' or '19,6 (CODEX)')
  */
-function vatrate($rate, $addpercent = false, $info_bits = 0, $usestarfornpr = 0)
+function vatrate($rate, $addpercent = false, $info_bits = 0, $usestarfornpr = 0, $html = 0)
 {
 	$morelabel = '';
 
@@ -5189,9 +5198,11 @@ function vatrate($rate, $addpercent = false, $info_bits = 0, $usestarfornpr = 0)
 		$rate = str_replace('%', '', $rate);
 		$addpercent = true;
 	}
+	$reg = array();
 	if (preg_match('/\((.*)\)/', $rate, $reg)) {
 		$morelabel = ' ('.$reg[1].')';
 		$rate = preg_replace('/\s*'.preg_quote($morelabel, '/').'/', '', $rate);
+		$morelabel = ' '.($html ? '<span class="opacitymedium">' : '').'('.$reg[1].')'.($html ? '</span>' : '');
 	}
 	if (preg_match('/\*/', $rate)) {
 		$rate = str_replace('*', '', $rate);
@@ -10043,9 +10054,11 @@ function dolGetButtonAction($label, $html = '', $actionType = 'default', $url = 
 	// Js Confirm button
 	if ($userRight && !empty($params['confirm'])) {
 		if (!is_array($params['confirm'])) {
-			$params['confirm'] = array(
-				'url' => $url . (strpos($url, '?') > 0 ? '&' : '?') . 'confirm=yes'
-			);
+			$params['confirm'] = array();
+		}
+
+		if (empty($params['confirm']['url'])) {
+			$params['confirm']['url'] = $url . (strpos($url, '?') > 0 ? '&' : '?') . 'confirm=yes';
 		}
 
 		// for js desabled compatibility set $url as call to confirm action and $params['confirm']['url'] to confirmed action

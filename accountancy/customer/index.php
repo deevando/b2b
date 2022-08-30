@@ -378,6 +378,7 @@ if (!empty($conf->global->ACCOUNTING_DATE_START_BINDING)) {
 }
 $sql .= " AND f.fk_statut > 0";
 $sql .= " AND fd.product_type <= 2";
+$sql .= " AND (f.close_code IS NULL OR f.close_code != '".Facture::CLOSECODE_REPLACED."')";
 $sql .= " AND f.entity IN (".getEntity('invoice', 0).")"; // We don't share object for accountancy
 $sql .= " AND aa.account_number IS NULL";
 if (!empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) {
@@ -495,6 +496,7 @@ if (!empty($conf->global->ACCOUNTING_DATE_START_BINDING)) {
 $sql .= " AND f.entity IN (".getEntity('invoice', 0).")"; // We don't share object for accountancy
 $sql .= " AND f.fk_statut > 0";
 $sql .= " AND fd.product_type <= 2";
+$sql .= " AND (f.close_code IS NULL OR f.close_code != '".Facture::CLOSECODE_REPLACED."')";
 if (!empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) {
 	$sql .= " AND f.type IN (".Facture::TYPE_STANDARD.", ".Facture::TYPE_REPLACEMENT.", ".Facture::TYPE_CREDIT_NOTE.", ".Facture::TYPE_SITUATION.")";
 } else {
@@ -595,6 +597,7 @@ if ($conf->global->MAIN_FEATURES_LEVEL > 0) { // This part of code looks strange
 	$sql .= " AND f.entity IN (".getEntity('invoice', 0).")"; // We don't share object for accountancy
 	$sql .= " AND f.fk_statut > 0";
 	$sql .= " AND fd.product_type <= 2";
+	$sql .= " AND (f.close_code IS NULL OR f.close_code != '".Facture::CLOSECODE_REPLACED."')";
 	if (!empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) {
 		$sql .= " AND f.type IN (".Facture::TYPE_STANDARD.", ".Facture::TYPE_REPLACEMENT.", ".Facture::TYPE_CREDIT_NOTE.", ".Facture::TYPE_SITUATION.")";
 	} else {
@@ -642,15 +645,22 @@ if ($conf->global->MAIN_FEATURES_LEVEL > 0) { // This part of code looks strange
 				$j -= 12;
 			}
 			$sql .= " SUM(".$db->ifsql("MONTH(f.datef)=".$j,
+			" (".$db->ifsql("f.type=2",
+									" (".$db->ifsql("fd.total_ht <= 0",
+										"(-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
+										"(fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").")",
+									" (".$db->ifsql("fd.total_ht < 0",
+										"(-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
+										"(fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").")",).")",
+								0).") AS month".str_pad($j, 2, '0', STR_PAD_LEFT).",";
+						}
+						$sql .= " SUM(".$db->ifsql("f.type=2",
+						" (".$db->ifsql("fd.total_ht <= 0",
+							"(-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
+							"(fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").")",
 						" (".$db->ifsql("fd.total_ht < 0",
-							" (-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
-							"  (fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").")",
-						 0).") AS month".str_pad($j, 2, '0', STR_PAD_LEFT).",";
-		}
-		$sql .= "  SUM(".$db->ifsql("fd.total_ht < 0",
-							" (-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
-							"  (fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").") as total";
-
+							"(-1 * (abs(fd.total_ht) - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100))))",
+							"(fd.total_ht - (fd.buy_price_ht * fd.qty * (fd.situation_percent / 100)))").")",).") AS total";
 		$sql .= " FROM ".MAIN_DB_PREFIX."facturedet as fd";
 		$sql .= "  LEFT JOIN ".MAIN_DB_PREFIX."facture as f ON f.rowid = fd.fk_facture";
 		$sql .= " WHERE f.datef >= '".$db->idate($search_date_start)."'";
@@ -662,6 +672,7 @@ if ($conf->global->MAIN_FEATURES_LEVEL > 0) { // This part of code looks strange
 		$sql .= " AND f.entity IN (".getEntity('invoice', 0).")"; // We don't share object for accountancy
 		$sql .= " AND f.fk_statut > 0";
 		$sql .= " AND fd.product_type <= 2";
+		$sql .= " AND (f.close_code IS NULL OR f.close_code != '".Facture::CLOSECODE_REPLACED."')";
 		if (!empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) {
 			$sql .= " AND f.type IN (".Facture::TYPE_STANDARD.", ".Facture::TYPE_REPLACEMENT.", ".Facture::TYPE_CREDIT_NOTE.", ".Facture::TYPE_SITUATION.")";
 		} else {

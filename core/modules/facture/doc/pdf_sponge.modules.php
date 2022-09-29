@@ -165,7 +165,6 @@ class pdf_sponge extends ModelePDFFactures
 		$this->option_tva = 1; // Manage the vat option FACTURE_TVAOPTION
 		$this->option_modereg = 1; // Display payment mode
 		$this->option_condreg = 1; // Display payment terms
-		$this->option_codeproduitservice = 1; // Display product-service code
 		$this->option_multilang = 1; // Available in several languages
 		$this->option_escompte = 1; // Displays if there has been a discount
 		$this->option_credit_note = 1; // Support credit notes
@@ -436,8 +435,13 @@ class pdf_sponge extends ModelePDFFactures
 
 				// You can add more thing under header here, if you increase $extra_under_address_shift too.
 				$extra_under_address_shift = 0;
+				$qrcodestring = '';
 				if (! empty($conf->global->INVOICE_ADD_ZATCA_QR_CODE)) {
 					$qrcodestring = $object->buildZATCAQRString();
+				} elseif (! empty($conf->global->INVOICE_ADD_SWISS_QR_CODE)) {
+					$qrcodestring = $object->buildSwitzerlandQRString();
+				}
+				if ($qrcodestring) {
 					$qrcodecolor = array('25', '25', '25');
 					// set style for QR-code
 					$styleQr = array(
@@ -1814,7 +1818,7 @@ class pdf_sponge extends ModelePDFFactures
 			// Credit note
 			if ($creditnoteamount) {
 				$labeltouse = ($outputlangs->transnoentities("CreditNotesOrExcessReceived") != "CreditNotesOrExcessReceived") ? $outputlangs->transnoentities("CreditNotesOrExcessReceived") : $outputlangs->transnoentities("CreditNotes");
-				$labeltouse .= (is_object($outputlangsbis) ? ' / '.($outputlangsbis->transnoentities("CreditNotesOrExcessReceived") != "CreditNotesOrExcessReceived") ? $outputlangsbis->transnoentities("CreditNotesOrExcessReceived") : $outputlangsbis->transnoentities("CreditNotes") : '');
+				$labeltouse .= (is_object($outputlangsbis) ? (' / '.($outputlangsbis->transnoentities("CreditNotesOrExcessReceived") != "CreditNotesOrExcessReceived") ? $outputlangsbis->transnoentities("CreditNotesOrExcessReceived") : $outputlangsbis->transnoentities("CreditNotes")) : '');
 				$index++;
 				$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
 				$pdf->MultiCell($col2x - $col1x, $tab2_hl, $labeltouse, 0, 'L', 0);

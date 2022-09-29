@@ -81,41 +81,6 @@ class pdf_standard_myobject extends ModelePDFMyObject
 	public $version = 'dolibarr';
 
 	/**
-	 * @var int page_largeur
-	 */
-	public $page_largeur;
-
-	/**
-	 * @var int page_hauteur
-	 */
-	public $page_hauteur;
-
-	/**
-	 * @var array format
-	 */
-	public $format;
-
-	/**
-	 * @var int marge_gauche
-	 */
-	public $marge_gauche;
-
-	/**
-	 * @var int marge_droite
-	 */
-	public $marge_droite;
-
-	/**
-	 * @var int marge_haute
-	 */
-	public $marge_haute;
-
-	/**
-	 * @var int marge_basse
-	 */
-	public $marge_basse;
-
-	/**
 	 * Issuer
 	 * @var Societe Object that emits
 	 */
@@ -933,8 +898,8 @@ class pdf_standard_myobject extends ModelePDFMyObject
 		pdf_pagehead($pdf, $outputlangs, $this->page_hauteur);
 
 		// Show Draft Watermark
-		if ($object->statut == $object::STATUS_DRAFT && (!empty($conf->global->FACTURE_DRAFT_WATERMARK))) {
-			  pdf_watermark($pdf, $outputlangs, $this->page_hauteur, $this->page_largeur, 'mm', $conf->global->FACTURE_DRAFT_WATERMARK);
+		if ($object->statut == $object::STATUS_DRAFT && getDolGlobalString('MYMODULE_DRAFT_WATERMARK')) {
+			pdf_watermark($pdf, $outputlangs, $this->page_hauteur, $this->page_largeur, 'mm', dol_escape_htmltag(getDolGlobalString('MYMODULE_DRAFT_WATERMARK')));
 		}
 
 		$pdf->SetTextColor(0, 0, 60);

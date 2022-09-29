@@ -27,6 +27,7 @@ CREATE TABLE llx_persona_nombre(
 	Codigo varchar(128) NOT NULL, 
 	Nombre varchar(128) NOT NULL, 
 	Direccion varchar(128) NOT NULL, 
-	Telefono varchar(128) NOT NULL
+	Telefono varchar(128) NOT NULL, 
+	fec_compra datetime NOT NULL
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;

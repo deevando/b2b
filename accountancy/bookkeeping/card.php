@@ -1,7 +1,7 @@
 <?php
 /* Copyright (C) 2013-2017  Olivier Geffroy         <jeff@jeffinfo.com>
  * Copyright (C) 2013-2017  Florian Henry           <florian.henry@open-concept.pro>
- * Copyright (C) 2013-2021  Alexandre Spangaro      <aspangaro@open-dsi.fr>
+ * Copyright (C) 2013-2022  Alexandre Spangaro      <aspangaro@open-dsi.fr>
  * Copyright (C) 2017       Laurent Destailleur     <eldy@users.sourceforge.net>
  * Copyright (C) 2018-2020  Frédéric France         <frederic.france@netlogic.fr>
  *
@@ -79,7 +79,7 @@ if (!empty($update)) {
 $object = new BookKeeping($db);
 
 // Security check
-if (empty($conf->accounting->enabled)) {
+if (!isModEnabled('accounting')) {
 	accessforbidden();
 }
 if ($user->socid > 0) {
@@ -540,21 +540,24 @@ if ($action == 'create') {
 		print '</td>';
 		print '</tr>';
 
-		// Date document export
-		print '<tr>';
-		print '<td class="titlefield">'.$langs->trans("DateExport").'</td>';
-		print '<td>';
-		print $object->date_export ? dol_print_date($object->date_export, 'dayhour') : '&nbsp;';
-		print '</td>';
-		print '</tr>';
+		// Don't show in tmp mode, inevitably empty
+		if ($mode != "_tmp") {
+			// Date document export
+			print '<tr>';
+			print '<td class="titlefield">' . $langs->trans("DateExport") . '</td>';
+			print '<td>';
+			print $object->date_export ? dol_print_date($object->date_export, 'dayhour') : '&nbsp;';
+			print '</td>';
+			print '</tr>';
 
-		// Date document validation
-		print '<tr>';
-		print '<td class="titlefield">'.$langs->trans("DateValidation").'</td>';
-		print '<td>';
-		print $object->date_validation ? dol_print_date($object->date_validation, 'dayhour') : '&nbsp;';
-		print '</td>';
-		print '</tr>';
+			// Date document validation
+			print '<tr>';
+			print '<td class="titlefield">' . $langs->trans("DateValidation") . '</td>';
+			print '<td>';
+			print $object->date_validation ? dol_print_date($object->date_validation, 'dayhour') : '&nbsp;';
+			print '</td>';
+			print '</tr>';
+		}
 
 		// Validate
 		/*
@@ -673,7 +676,7 @@ if ($action == 'create') {
 						// Also, it is not possible to use a value that is not in the list.
 						// Also, the label is not automatically filled when a value is selected.
 						if (!empty($conf->global->ACCOUNTANCY_COMBO_FOR_AUX)) {
-							print $formaccounting->select_auxaccount((GETPOSTISSET("subledger_account") ? GETPOST("subledger_account", "alpha") : $line->subledger_account), 'subledger_account', 1);
+							print $formaccounting->select_auxaccount((GETPOSTISSET("subledger_account") ? GETPOST("subledger_account", "alpha") : $line->subledger_account), 'subledger_account', 1, 'maxwidth250', '', 'subledger_label');
 						} else {
 							print '<input type="text" class="maxwidth150" name="subledger_account" value="'.(GETPOSTISSET("subledger_account") ? GETPOST("subledger_account", "alpha") : $line->subledger_account).'" placeholder="'.dol_escape_htmltag($langs->trans("SubledgerAccount")).'">';
 						}

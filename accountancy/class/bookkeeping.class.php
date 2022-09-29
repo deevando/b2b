@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2014-2017  Olivier Geffroy     <jeff@jeffinfo.com>
- * Copyright (C) 2015-2017  Alexandre Spangaro  <aspangaro@open-dsi.fr>
+ * Copyright (C) 2015-2022  Alexandre Spangaro  <aspangaro@open-dsi.fr>
  * Copyright (C) 2015-2020  Florian Henry       <florian.henry@open-concept.pro>
  * Copyright (C) 2018-2020  Frédéric France     <frederic.france@netlogic.fr>
  *
@@ -460,7 +460,7 @@ class BookKeeping extends CommonObject
 	{
 		global $db, $conf, $langs;
 		global $dolibarr_main_authentication, $dolibarr_main_demo;
-		global $menumanager;
+		global $menumanager, $hookmanager;
 
 		if (!empty($conf->dol_no_mouse_hover)) {
 			$notooltip = 1; // Force disable tooltips
@@ -512,6 +512,15 @@ class BookKeeping extends CommonObject
 		$result .= $linkend;
 		//if ($withpicto != 2) $result.=(($addlabel && $this->label) ? $sep . dol_trunc($this->label, ($addlabel > 1 ? $addlabel : 0)) : '');
 
+		global $action;
+		$hookmanager->initHooks(array($this->element . 'dao'));
+		$parameters = array('id'=>$this->id, 'getnomurl' => &$result);
+		$reshook = $hookmanager->executeHooks('getNomUrl', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
+		if ($reshook > 0) {
+			$result = $hookmanager->resPrint;
+		} else {
+			$result .= $hookmanager->resPrint;
+		}
 		return $result;
 	}
 
@@ -847,7 +856,8 @@ class BookKeeping extends CommonObject
 		$sql .= " t.piece_num,";
 		$sql .= " t.date_creation,";
 		$sql .= " t.date_export,";
-		$sql .= " t.date_validated as date_validation";
+		$sql .= " t.date_validated as date_validation,";
+		$sql .= " t.import_key";
 		// Manage filter
 		$sqlwhere = array();
 		if (count($filter) > 0) {
@@ -942,6 +952,7 @@ class BookKeeping extends CommonObject
 				$line->date_creation = $this->db->jdate($obj->date_creation);
 				$line->date_export = $this->db->jdate($obj->date_export);
 				$line->date_validation = $this->db->jdate($obj->date_validation);
+				$line->import_key = $obj->import_key;
 
 				$this->lines[] = $line;
 
@@ -1656,7 +1667,9 @@ class BookKeeping extends CommonObject
 			$this->doc_type = $obj->doc_type;
 			$this->date_creation = $this->db->jdate($obj->date_creation);
 			$this->date_modification = $this->db->jdate($obj->date_modification);
-			$this->date_export = $this->db->jdate($obj->date_export);
+			if ($mode != "_tmp") {
+				$this->date_export = $this->db->jdate($obj->date_export);
+			}
 			$this->date_validation = $this->db->jdate($obj->date_validation);
 		} else {
 			$this->error = "Error ".$this->db->lasterror();
@@ -1753,7 +1766,9 @@ class BookKeeping extends CommonObject
 				$line->piece_num = $obj->piece_num;
 				$line->date_creation = $obj->date_creation;
 				$line->date_modification = $obj->date_modification;
-				$line->date_export = $obj->date_export;
+				if ($mode != "_tmp") {
+					$line->date_export = $obj->date_export;
+				}
 				$line->date_validation = $obj->date_validation;
 
 				$this->linesmvt[] = $line;
@@ -1835,8 +1850,8 @@ class BookKeeping extends CommonObject
 	/**
 	 * Transform transaction
 	 *
-	 * @param  number   $direction      If 0 tmp => real, if 1 real => tmp
-	 * @param  string   $piece_num      Piece num
+	 * @param  number   $direction      If 0: tmp => real, if 1: real => tmp
+	 * @param  string   $piece_num      Piece num = Transaction ref
 	 * @return int                      int <0 if KO, >0 if OK
 	 */
 	public function transformTransaction($direction = 0, $piece_num = '')

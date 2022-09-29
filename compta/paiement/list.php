@@ -104,8 +104,8 @@ $arrayfields = array(
 	'p.datep'			=> array('label'=>"Date", 'checked'=>1, 'position'=>20),
 	's.nom'				=> array('label'=>"ThirdParty", 'checked'=>1, 'position'=>30),
 	'c.libelle'			=> array('label'=>"Type", 'checked'=>1, 'position'=>40),
-	'transaction'		=> array('label'=>"BankTransactionLine", 'checked'=>1, 'position'=>50, 'enabled'=>(!empty($conf->banque->enabled))),
-	'ba.label'			=> array('label'=>"Account", 'checked'=>1, 'position'=>60, 'enabled'=>(!empty($conf->banque->enabled))),
+	'transaction'		=> array('label'=>"BankTransactionLine", 'checked'=>1, 'position'=>50, 'enabled'=>isModEnabled('banque')),
+	'ba.label'			=> array('label'=>"Account", 'checked'=>1, 'position'=>60, 'enabled'=>(isModEnabled('banque'))),
 	'p.num_paiement'	=> array('label'=>"Numero", 'checked'=>1, 'position'=>70, 'tooltip'=>"ChequeOrTransferNumber"),
 	'p.amount'			=> array('label'=>"Amount", 'checked'=>1, 'position'=>80),
 	'p.statut'			=> array('label'=>"Status", 'checked'=>1, 'position'=>90, 'enabled'=>(!empty($conf->global->BILL_ADD_PAYMENT_VALIDATION))),
@@ -148,7 +148,7 @@ if (empty($reshook)) {
 		$search_company = '';
 		$search_status = '';
 		$option = '';
-		$toselect = '';
+		$toselect = array();
 		$search_array_options = array();
 	}
 }
@@ -528,7 +528,7 @@ while ($i < min($num, $limit)) {
 	// Date
 	if (!empty($arrayfields['p.datep']['checked'])) {
 		$dateformatforpayment = 'dayhour';
-		print '<td class="center">'.dol_print_date($db->jdate($objp->datep), $dateformatforpayment).'</td>';
+		print '<td class="center">'.dol_print_date($db->jdate($objp->datep), $dateformatforpayment, 'tzuser').'</td>';
 		if (!$i) {
 			$totalarray['nbfield']++;
 		}

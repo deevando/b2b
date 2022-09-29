@@ -61,7 +61,7 @@ $hookmanager->initHooks(array('purchasesjournal'));
 $parameters = array();
 
 // Security check
-if (empty($conf->accounting->enabled)) {
+if (!isModEnabled('accounting')) {
 	accessforbidden();
 }
 if ($user->socid > 0) {
@@ -376,6 +376,12 @@ if ($action == 'writebookkeeping') {
 						$errorforline++;
 						$errorforinvoice[$key] = 'other';
 						setEventMessages($bookkeeping->error, $bookkeeping->errors, 'errors');
+					}
+				} else {
+					if (getDolGlobalInt('ACCOUNTING_ENABLE_LETTERING')) {
+						require_once DOL_DOCUMENT_ROOT . '/accountancy/class/lettering.class.php';
+						$lettering_static = new Lettering($db);
+						$nb_lettering = $lettering_static->bookkeepingLettering(array($bookkeeping->id), 'supplier_invoice');
 					}
 				}
 			}

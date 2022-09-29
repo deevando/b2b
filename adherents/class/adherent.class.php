@@ -7,7 +7,7 @@
  * Copyright (C) 2009-2017	Regis Houssin			<regis.houssin@inodbox.com>
  * Copyright (C) 2014-2018	Alexandre Spangaro		<aspangaro@open-dsi.fr>
  * Copyright (C) 2015		Marcos García			<marcosgdf@gmail.com>
- * Copyright (C) 2015-2020	Frédéric France			<frederic.france@netlogic.fr>
+ * Copyright (C) 2015-2022	Frédéric France			<frederic.france@netlogic.fr>
  * Copyright (C) 2015		Raphaël Doursenaud		<rdoursenaud@gpcsolutions.fr>
  * Copyright (C) 2016		Juanjo Menent			<jmenent@2byte.es>
  * Copyright (C) 2018-2019	Thibault FOUCART		<support@ptibogxiv.net>
@@ -656,6 +656,8 @@ class Adherent extends CommonObject
 	{
 		global $conf, $langs, $hookmanager;
 
+		require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
+
 		$nbrowsaffected = 0;
 		$error = 0;
 
@@ -961,10 +963,10 @@ class Adherent extends CommonObject
 	}
 
 	/**
-	 *  Fonction qui supprime l'adherent et les donnees associees
+	 *  Fonction to delete a member and its data
 	 *
 	 *  @param	int		$rowid		Id of member to delete
-	 *	@param	User		$user		User object
+	 *	@param	User	$user		User object
 	 *	@param	int		$notrigger	1=Does not execute triggers, 0= execute triggers
 	 *  @return	int					<0 if KO, 0=nothing to do, >0 if OK
 	 */
@@ -1534,9 +1536,9 @@ class Adherent extends CommonObject
 	 *
 	 *	@param	int	        $date        		Date of effect of subscription
 	 *	@param	double		$amount     		Amount of subscription (0 accepted for some members)
-	 *	@param	int			$accountid			Id bank account
-	 *	@param	string		$operation			Type of payment (if Id bank account provided). Example: 'CB', ...
-	 *	@param	string		$label				Label operation (if Id bank account provided)
+	 *	@param	int			$accountid			Id bank account. NOT USED.
+	 *	@param	string		$operation			Code of payment mode (if Id bank account provided). Example: 'CB', ... NOT USED.
+	 *	@param	string		$label				Label operation (if Id bank account provided).
 	 *	@param	string		$num_chq			Numero cheque (if Id bank account provided)
 	 *	@param	string		$emetteur_nom		Name of cheque writer
 	 *	@param	string		$emetteur_banque	Name of bank of cheque
@@ -1813,7 +1815,7 @@ class Adherent extends CommonObject
 				if (!$error) {
 					// Create payment line for invoice
 					$paiement_id = $paiement->create($user);
-					if (!$paiement_id > 0) {
+					if (!($paiement_id > 0)) {
 						$this->error = $paiement->error;
 						$this->errors = $paiement->errors;
 						$error++;
@@ -2163,7 +2165,7 @@ class Adherent extends CommonObject
 	 */
 	public function getNomUrl($withpictoimg = 0, $maxlen = 0, $option = 'card', $mode = '', $morecss = '', $save_lastsearch_value = -1, $notooltip = 0, $addlinktonotes = 0)
 	{
-		global $conf, $langs;
+		global $conf, $langs, $hookmanager;
 
 		if (!empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) && $withpictoimg) {
 			$withpictoimg = 0;
@@ -2281,7 +2283,15 @@ class Adherent extends CommonObject
 				$result .= '</span>';
 			}
 		}
-
+		global $action;
+		$hookmanager->initHooks(array($this->element . 'dao'));
+		$parameters = array('id'=>$this->id, 'getnomurl' => &$result);
+		$reshook = $hookmanager->executeHooks('getNomUrl', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
+		if ($reshook > 0) {
+			$result = $hookmanager->resPrint;
+		} else {
+			$result .= $hookmanager->resPrint;
+		}
 		return $result;
 	}
 
@@ -2769,24 +2779,10 @@ class Adherent extends CommonObject
 			if ($this->db->num_rows($result)) {
 				$obj = $this->db->fetch_object($result);
 				$this->id = $obj->rowid;
-				if ($obj->fk_user_author) {
-					$cuser = new User($this->db);
-					$cuser->fetch($obj->fk_user_author);
-					$this->user_creation = $cuser;
-				}
 
-				if ($obj->fk_user_valid) {
-					$vuser = new User($this->db);
-					$vuser->fetch($obj->fk_user_valid);
-					$this->user_validation = $vuser;
-				}
-
-				if ($obj->fk_user_mod) {
-					$muser = new User($this->db);
-					$muser->fetch($obj->fk_user_mod);
-					$this->user_modification = $muser;
-				}
-
+				$this->user_creation_id = $obj->fk_user_author;
+				$this->user_validation_id = $obj->fk_user_valid;
+				$this->user_modification_id = $obj->fk_user_mod;
 				$this->date_creation = $this->db->jdate($obj->datec);
 				$this->date_validation = $this->db->jdate($obj->datev);
 				$this->date_modification = $this->db->jdate($obj->datem);

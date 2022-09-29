@@ -1,0 +1,8 @@
+.buildpath
+.project
+.settings/
+*.log
+/nbproject
+www/.htaccess
+www/.htaccess.sample
+www/custom_assets/

@@ -58,10 +58,10 @@ class modEcoTaxDeee extends DolibarrModules
 		$this->name = preg_replace('/^mod/i', '', get_class($this));
 		// Module description used if translation string 'ModuleXXXDesc' not found (where XXX is value of numeric property 'numero' of module)
 		$this->description = "Module to add ecotax lines automatically";
-		$this->editor_name = 'NLTechno';
-		$this->editor_url = 'https://www.nltechno.com';
+		$this->editor_name = 'DoliCloud';
+		$this->editor_url = 'https://www.dolicloud.com';
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
-		$this->version = '4.1.2';
+		$this->version = '4.1.3';
 		// Key used in llx_const table to save module status enabled/disabled
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		// Name of png file (without png) used for this module.
@@ -150,7 +150,7 @@ class modEcoTaxDeee extends DolibarrModules
 		// Create extrafields
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		$extrafields = new ExtraFields($this->db);
-		$result1=$extrafields->addExtraField('ecotaxdeee', $langs->trans("Ecotax"), 'double', 1, '24,8', 'product', 0, 0, '', '', 1);
+		$result1=$extrafields->addExtraField('ecotaxdeee', $langs->trans("Ecotax"), 'double', 41, '24,8', 'product', 0, 0, '', '', 1);
 		if (! $result1) {
 			$this->error=$extrafields->error;
 			return -1;

@@ -1,0 +1,187 @@
+ModuleName = ExternalAccess
+ModuleDesc = externalaccess Description
+
+ATMAbout = This module has been developed by <a href="http://www.atm-consulting.fr" target="_blank">ATM Consulting</a><br>You can find the documentation on our <a href="http://wiki.atm-consulting.fr/index.php/Accueil" target="_blank">wiki</a><br><br>For any question or feedback, contact us on <a href="mailto:support@atm-consulting.fr">support@atm-consulting.fr</a><br><br>For any commercial question, contact us on <a href="mailto:contact@atm-consulting.fr">contact@atm-consulting.fr</a> or at +33 9 77 19 50 70<br><br>Find our other modules on <a href="http://www.dolistore.com/search.php?orderby=position&orderway=desc&search_query=atm&submit_search=Rechercher" target="_blank">Dolistore</a>
+
+externalaccessSetup = externalaccess module setup
+externalaccessAbout = About externalaccess
+
+ForgotThePassword = Forgot the password?
+Rememberme = Remember me
+SignIn = Sign in
+
+BackToModuleList = Back to the list of modules
+
+externalaccess = ExternalAccess
+
+
+EACCESS_ACTIVATE_EXPEDITIONS = Expéditions
+EACCESS_ACTIVATE_TICKETS = Tickets
+EACCESS_ACTIVATE_PROJECTS = Projets
+
+
+
+# RIGHTS 
+external_access_invoices = can view invoices
+external_access_propals = can view propals
+external_access_orders = can view orders
+external_access_expeditions = can view shipments 
+external_access_tickets = can view tickets 
+external_access_projets = can view projects
+external_access_userinfos_edit = can modify personal information
+
+# MENU 
+TopMenuexternalaccess = External Access
+
+# STATUS 
+externalaccessStatusDraft = Draft (to be validated)
+externalaccessStatusValidated = Validated (to accept)
+externalaccessStatusRefused = Refused (closed)
+externalaccessStatusAccepted = Accepted (closed)
+
+Draft = Draft 
+Validate = Validate
+Refused = Refused 
+Accepted = Accepted
+
+# LIST
+externalaccessList = List Client Portal
+Noexternalaccess = (empty)
+pdfLinkedDocuments = linked documents
+
+# CARD 
+Newexternalaccess = create external access
+externalaccessCard = Card ExternalAccess
+ErrorDetected = Error(s) detected, please check the form
+
+# CARD TPL
+Save = save
+CreateDraft = create draft
+Cancel = cancel
+Validate = validate
+Modify = modify
+Reopen = reopen
+ToClone = clone
+Delete = delete
+
+DateFinValidite = Expiration date
+EndValidDate = End of validity
+DateLivraison = Expected delivery date
+DatePayLimit = Date to pay
+
+# Diver tools
+OrSeparator = or
+
+
+# PAGE TITLE 
+Welcome = Welcome
+WelcomeDesc = Welcome to our Client Portal
+
+PersonalInformations = Personal information
+
+EALINKNAME_gobackurl = Back to website
+
+ViewInvoices = Invoices
+ViewInvoicesDesc = Easily find all your invoices
+EALINKNAME_invoices = Invoices
+
+ViewPropals = Quotations
+ViewPropalsDesc = Easily find all your quotations
+EALINKNAME_propals = Quotations
+
+ViewOrders = Orders
+ViewOrdersDesc = Easily find all your orders
+EALINKNAME_orders = Orders
+
+ViewExpeditions = Deliveries
+ViewExpeditionsDesc = Easily find all your orders deliveries
+EALINKNAME_expeditions = Deliveries
+
+ViewTickets = Tickets
+ViewTicketsDesc = Easily find all your tickets
+EALINKNAME_tickets = Tickets
+
+ViewProjects = Projects
+ViewProjectsDesc = Easily find all your projects
+EALINKNAME_projects = Projects
+
+
+
+
+firstname = First Name
+lastname = Name
+address = Address
+addresszip = postal code 
+town = Town
+exa_Edit = modify
+User_mobile = mobile phone
+Office_phone = office phone
+Office_fax = Fax
+Saved = saved
+Company = Company
+
+
+Quotations = Quotations
+Orders = Orders
+Invoices = Invoices
+
+Renew = Renew
+
+AbricotNotFound = Abricot module missing, this module is required.
+AbricotWiki = View page informations about Abricot module.
+EACCESS_ROOT_URL = Public URL
+EACCESS_ROOT_URL_HELP = If you use a virtual host
+EACCESS_TITLE = Title of public front page
+EACCESS_TITLE_HELP = This title will appear on search engine and web browser tab and on top menu if no logo for menu is defined.
+EACCESS_GOBACK_URL = Back link URL
+EACCESS_GOBACK_URL_HELP = If URL is provided, it adds a "back to the site" link in the top menu
+EACCESS_PRIMARY_COLOR = Main theme color
+EACCESS_PRIMARY_COLOR_HELP = On public pages, remember to press the CTRL+F5 key or empty your browser's cache after modifying this value to make it work
+EACCESS_PHONE = Contact phone
+EACCESS_EMAIL = Contact e-mail
+EACCESS_EMAIL_HELP = This e-mail address is visible in the page footer. You can also use this to provide the URL of a contact form.
+EACCESS_ACTIVATE_MODULES = Accessible modules
+EACCESS_ACTIVATE_INVOICES = Invoices
+EACCESS_need_some_rights = Note: User's rights needs to be configured
+EACCESS_ACTIVATE_PROPALS = Quotations
+EACCESS_ACTIVATE_ORDERS = Orders
+EACCESS_HEADER_IMG = Background Image URL
+EACCESS_HEADER_IMG_HELP = You can use a custom image or use one of the following images: <ul><li>../img/header_01.jpg</li><li>../img/header_04.jpg</li><li>../img/header_02.jpg</li><li>../img/header_03.jpg</li></ul>On the customer portal pages, remember to press the CTRL+F5 key or empty your browser's cache after modifying this value
+AccessToCustomerGate = Visit external access page
+EACCESS_LOGIN_EXTRA_HTML = Additional text displayed on the login page.
+EACCESS_RGPD_MSG = GDPR message on the personal information form
+EACCESS_RGPD_MSG_default = You can request the rectification of inaccurate or incomplete information concerning you. By modifying and submitting this form, you grant %s permission to read the information provided therein and, if applicable, manage the resulting contractual relationship.
+EACCESS_ADD_INFOS_COMMERCIAL_BAS_DE_PAGE = Display information of the third-party sales representative associated with user  in footer
+EACCESS_ADD_INFOS_COMMERCIAL_BAS_DE_PAGE_HELP = Need at least one completed third-party salesperson signature
+EACCESS_LIST_ADDED_COLUMNS = Additional columns to display on lists
+TrackingNumberOnlyExpedition = Tracking number (shipping list only)
+ConfLinkedToContents = Content-related settings
+ConfLinkedToContactInfos = Contact related settings
+ConfLinkedToDesign = Appearance-related settings
+EACCESS_LOGIN_IMG = logo Url
+EACCESS_LOGIN_IMG_HELP = This image appears on the portal login page. Leave blank to use the logo configured in your company settings.
+EACCESS_TOP_MENU_IMG = Menu logo URL
+EACCESS_TOP_MENU_IMG_HELP = Leave empty to use the "Title of public front page"
+EACCESS_TOP_MENU_IMG_SHRINK = Substitute logo url
+EACCESS_TOP_MENU_IMG_SHRINK_HELP = If set, the substitute logo will replaces the menu logo with this one on menu state change while scrolling the page. For example, this allows to use a transparent logo image with white texts and, when changing menu status, to use a logo compatible with the format.
+MySpace = My space
+ref_client = Customer Ref.
+ref_customer = Customer Ref.
+tracking_url = Tracking number
+ForgotPassword = Forgotten password ?
+YouCanResetYourPasswordHere = You can renew it here
+
+GetInTouch = Get in touch
+GetInTouchDesc = Ready to start your next project with us? Call or email us and we'll get back to you as soon as possible!
+MyPersonalInfos = My data
+UserInfosDesc = My personal informations
+YourPersonnalInformations = your personal Information
+SorryThereIsNothingHere = Sorry, there is nothing here
+YourSalesRep = Your contact at %s :
+YourSalesRepMultiple = Your contacts at %s :
+EACCESS_Nothing = Currently, there is nothing here. Patience, your documents will be available soon
+Amount_HT = Amount excl. taxe
+Amount_TTC = Amount
+RemainderToPay = Left to pay
+DocumentFileNotAvailable = Document currently not available.
+EaBack = Back

@@ -256,12 +256,12 @@ class Website extends CommonObject
 				}
 			}
 
-			// Uncomment this and change MYOBJECT to your own tag if you
+			// Uncomment this and change WEBSITE to your own tag if you
 			// want this action to call a trigger.
 			// if (!$notrigger) {
 
 			//     // Call triggers
-			//     $result = $this->call_trigger('MYOBJECT_CREATE',$user);
+			//     $result = $this->call_trigger('WEBSITE_CREATE',$user);
 			//     if ($result < 0) $error++;
 			//     // End call triggers
 			// }
@@ -560,7 +560,7 @@ class Website extends CommonObject
 			}
 
 			//// Call triggers
-			//$result=$this->call_trigger('MYOBJECT_MODIFY',$user);
+			//$result=$this->call_trigger('WEBSITE_MODIFY',$user);
 			//if ($result < 0) { $error++; //Do also what you must do to rollback action if trigger fail}
 			//// End call triggers
 		}
@@ -587,6 +587,8 @@ class Website extends CommonObject
 	 */
 	public function delete(User $user, $notrigger = false)
 	{
+		global $conf;
+
 		dol_syslog(__METHOD__, LOG_DEBUG);
 
 		$error = 0;
@@ -595,11 +597,11 @@ class Website extends CommonObject
 
 		if (!$error) {
 			if (!$notrigger) {
-				// Uncomment this and change MYOBJECT to your own tag if you
+				// Uncomment this and change WEBSITE to your own tag if you
 				// want this action calls a trigger.
 
 				//// Call triggers
-				//$result=$this->call_trigger('MYOBJECT_DELETE',$user);
+				//$result=$this->call_trigger('WEBSITE_DELETE',$user);
 				//if ($result < 0) { $error++; //Do also what you must do to rollback action if trigger fail}
 				//// End call triggers
 			}
@@ -618,7 +620,7 @@ class Website extends CommonObject
 		}
 
 		if (!$error && !empty($this->ref)) {
-			$pathofwebsite = DOL_DATA_ROOT.'/website/'.$this->ref;
+			$pathofwebsite = DOL_DATA_ROOT.($conf->entity > 1 ? '/'.$conf->entity : '').'/website/'.$this->ref;
 
 			dol_delete_dir_recursive($pathofwebsite);
 		}
@@ -678,8 +680,8 @@ class Website extends CommonObject
 		$oldidforhome = $object->fk_default_home;
 		$oldref = $object->ref;
 
-		$pathofwebsiteold = $dolibarr_main_data_root.'/website/'.dol_sanitizeFileName($oldref);
-		$pathofwebsitenew = $dolibarr_main_data_root.'/website/'.dol_sanitizeFileName($newref);
+		$pathofwebsiteold = $dolibarr_main_data_root.($conf->entity > 1 ? '/'.$conf->entity : '').'/website/'.dol_sanitizeFileName($oldref);
+		$pathofwebsitenew = $dolibarr_main_data_root.($conf->entity > 1 ? '/'.$conf->entity : '').'/website/'.dol_sanitizeFileName($newref);
 		dol_delete_dir_recursive($pathofwebsitenew);
 
 		$fileindex = $pathofwebsitenew.'/index.php';
@@ -1084,7 +1086,7 @@ class Website extends CommonObject
 
 			$line .= "'".$this->db->escape($stringtoexport)."', "; // Replace \r \n to have record on 1 line
 			$line .= "'".$this->db->escape($objectpageold->author_alias)."', ";
-			$line .= "'".$this->db->escape($objectpageold->allowed_in_frames)."'";
+			$line .= (int) $objectpageold->allowed_in_frames;
 			$line .= ");";
 			$line .= "\n";
 
@@ -1101,7 +1103,7 @@ class Website extends CommonObject
 		}
 
 		$line = "\n-- For Dolibarr v14+ --;\n";
-		$line .= "UPDATE llx_website SET lang = '".$this->db->escape($this->fk_default_lang)."' WHERE rowid = __WEBSITE_ID__;\n";
+		$line .= "UPDATE llx_website SET lang = '".$this->db->escape($this->lang)."' WHERE rowid = __WEBSITE_ID__;\n";
 		$line .= "UPDATE llx_website SET otherlang = '".$this->db->escape($this->otherlang)."' WHERE rowid = __WEBSITE_ID__;\n";
 		$line .= "\n";
 		fputs($fp, $line);
@@ -1144,7 +1146,7 @@ class Website extends CommonObject
 		$object = $this;
 		if (empty($object->ref)) {
 			$this->error = 'Function importWebSite called on object not loaded (object->ref is empty)';
-			return -1;
+			return -2;
 		}
 
 		dol_delete_dir_recursive($conf->website->dir_temp."/".$object->ref);
@@ -1153,14 +1155,14 @@ class Website extends CommonObject
 		$filename = basename($pathtofile);
 		if (!preg_match('/^website_(.*)-(.*)$/', $filename, $reg)) {
 			$this->errors[] = 'Bad format for filename '.$filename.'. Must be website_XXX-VERSION.';
-			return -1;
+			return -3;
 		}
 
 		$result = dol_uncompress($pathtofile, $conf->website->dir_temp.'/'.$object->ref);
 
 		if (!empty($result['error'])) {
 			$this->errors[] = 'Failed to unzip file '.$pathtofile.'.';
-			return -1;
+			return -4;
 		}
 
 		$arrayreplacement = array();
@@ -1207,9 +1209,9 @@ class Website extends CommonObject
 		}
 
 		// Load sql record
-		$runsql = run_sql($sqlfile, 1, '', 0, '', 'none', 0, 1); // The maxrowid of table is searched into this function two
+		$runsql = run_sql($sqlfile, 1, '', 0, '', 'none', 0, 1, 0, 0, 1); // The maxrowid of table is searched into this function two
 		if ($runsql <= 0) {
-			$this->errors[] = 'Failed to load sql file '.$sqlfile;
+			$this->errors[] = 'Failed to load sql file '.$sqlfile.' (ret='.((int) $runsql).')';
 			$error++;
 		}
 

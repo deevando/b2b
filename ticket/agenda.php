@@ -170,7 +170,7 @@ if (!empty($object->origin_email)) {
 }
 
 // Thirdparty
-if (!empty($conf->societe->enabled)) {
+if (isModEnabled('societe')) {
 	$morehtmlref .= '<br>'.$langs->trans('ThirdParty');
 	/*if ($action != 'editcustomer' && $object->fk_statut < 8 && !$user->socid && $user->rights->ticket->write) {
 		$morehtmlref.='<a class="editfielda" href="' . $url_page_current . '?action=editcustomer&token='.newToken().'&track_id=' . $object->track_id . '">' . img_edit($langs->transnoentitiesnoconv('Edit'), 1) . '</a>';
@@ -184,7 +184,7 @@ if (!empty($conf->societe->enabled)) {
 }
 
 // Project
-if (!empty($conf->projet->enabled)) {
+if (isModEnabled('project')) {
 	$langs->load("projects");
 	$morehtmlref .= '<br>'.$langs->trans('Project');
 	if ($user->rights->ticket->write) {
@@ -239,7 +239,7 @@ if (!empty($object->id)) {
 	$messagingUrl = DOL_URL_ROOT.'/ticket/messaging.php?track_id='.$object->track_id;
 	$morehtmlright .= dolGetButtonTitle($langs->trans('ShowAsConversation'), '', 'fa fa-comments imgforviewmode', $messagingUrl, '', 1);
 	$messagingUrl = DOL_URL_ROOT.'/ticket/agenda.php?track_id='.$object->track_id;
-	$morehtmlright .= dolGetButtonTitle($langs->trans('MessageListViewType'), '', 'fa fa-list-alt imgforviewmode', $messagingUrl, '', 1, array('morecss'=>'btnTitleSelected'));
+	$morehtmlright .= dolGetButtonTitle($langs->trans('MessageListViewType'), '', 'fa fa-bars imgforviewmode', $messagingUrl, '', 1, array('morecss'=>'btnTitleSelected'));
 
 	// Show link to add a message (if read and not closed)
 	$btnstatus = $object->fk_statut < Ticket::STATUS_CLOSED && $action != "presend" && $action != "presend_addmessage";

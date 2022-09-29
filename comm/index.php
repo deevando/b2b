@@ -127,6 +127,7 @@ if ($tmp) {
 /*
  * Draft customer proposals
  */
+
 if (!empty($conf->propal->enabled) && $user->rights->propal->lire) {
 	$sql = "SELECT p.rowid, p.ref, p.ref_client, p.total_ht, p.total_tva, p.total_ttc, p.fk_statut as status";
 	$sql .= ", s.rowid as socid, s.nom as name, s.name_alias";
@@ -193,7 +194,7 @@ if (!empty($conf->propal->enabled) && $user->rights->propal->lire) {
 				$companystatic->canvas = $obj->canvas;
 
 				print '<tr class="oddeven">';
-				print '<td class="nowrap tdoverflowmax100">'.$propalstatic->getNomUrl(1).'</td>';
+				print '<td class="nowraponall tdoverflowmax100">'.$propalstatic->getNomUrl(1).'</td>';
 				print '<td class="nowrap tdoverflowmax100">'.$companystatic->getNomUrl(1, 'customer').'</td>';
 				print '<td class="nowrap right tdamount amount">'.price((!empty($conf->global->MAIN_DASHBOARD_USE_TOTAL_HT) ? $obj->total_ht : $obj->total_ttc)).'</td>';
 				print '</tr>';
@@ -224,6 +225,7 @@ if (!empty($conf->propal->enabled) && $user->rights->propal->lire) {
 /*
  * Draft supplier proposals
  */
+
 if (!empty($conf->supplier_proposal->enabled) && $user->rights->supplier_proposal->lire) {
 	$sql = "SELECT p.rowid, p.ref, p.total_ht, p.total_tva, p.total_ttc, p.fk_statut as status";
 	$sql .= ", s.rowid as socid, s.nom as name, s.name_alias";
@@ -289,7 +291,7 @@ if (!empty($conf->supplier_proposal->enabled) && $user->rights->supplier_proposa
 				$companystatic->canvas = $obj->canvas;
 
 				print '<tr class="oddeven">';
-				print '<td class="nowrap tdoverflowmax100">'.$supplierproposalstatic->getNomUrl(1).'</td>';
+				print '<td class="nowraponall tdoverflowmax100">'.$supplierproposalstatic->getNomUrl(1).'</td>';
 				print '<td class="nowrap tdoverflowmax100">'.$companystatic->getNomUrl(1, 'supplier').'</td>';
 				print '<td class="nowrap right tdamount amount">'.price(!empty($conf->global->MAIN_DASHBOARD_USE_TOTAL_HT) ? $obj->total_ht : $obj->total_ttc).'</td>';
 				print '</tr>';
@@ -320,6 +322,7 @@ if (!empty($conf->supplier_proposal->enabled) && $user->rights->supplier_proposa
 /*
  * Draft customer orders
  */
+
 if (!empty($conf->commande->enabled) && $user->rights->commande->lire) {
 	$sql = "SELECT c.rowid, c.ref, c.ref_client, c.total_ht, c.total_tva, c.total_ttc, c.fk_statut as status";
 	$sql .= ", s.rowid as socid, s.nom as name, s.name_alias";
@@ -386,7 +389,7 @@ if (!empty($conf->commande->enabled) && $user->rights->commande->lire) {
 				$companystatic->canvas = $obj->canvas;
 
 				print '<tr class="oddeven">';
-				print '<td class="nowrap tdoverflowmax100">'.$orderstatic->getNomUrl(1).'</td>';
+				print '<td class="nowraponall tdoverflowmax100">'.$orderstatic->getNomUrl(1).'</td>';
 				print '<td class="nowrap tdoverflowmax100">'.$companystatic->getNomUrl(1, 'customer').'</td>';
 				print '<td class="nowrap right tdamount amount">'.price(!empty($conf->global->MAIN_DASHBOARD_USE_TOTAL_HT) ? $obj->total_ht : $obj->total_ttc).'</td>';
 				print '</tr>';
@@ -404,7 +407,7 @@ if (!empty($conf->commande->enabled) && $user->rights->commande->lire) {
 			}
 		}
 
-		addSummaryTableLine(3, $num, $nbofloop, $total, "NoProposal");
+		addSummaryTableLine(3, $num, $nbofloop, $total, "NoOrder");
 		finishSimpleTable(true);
 
 		$db->free($resql);
@@ -417,6 +420,7 @@ if (!empty($conf->commande->enabled) && $user->rights->commande->lire) {
 /*
  * Draft purchase orders
  */
+
 if ((!empty($conf->fournisseur->enabled) && empty($conf->global->MAIN_USE_NEW_SUPPLIERMOD) && $user->rights->fournisseur->commande->lire) || (!empty($conf->supplier_order->enabled) && $user->rights->supplier_order->lire)) {
 	$sql = "SELECT cf.rowid, cf.ref, cf.ref_supplier, cf.total_ht, cf.total_tva, cf.total_ttc, cf.fk_statut as status";
 	$sql .= ", s.rowid as socid, s.nom as name, s.name_alias";
@@ -483,7 +487,7 @@ if ((!empty($conf->fournisseur->enabled) && empty($conf->global->MAIN_USE_NEW_SU
 				$companystatic->canvas = $obj->canvas;
 
 				print '<tr class="oddeven">';
-				print '<td class="nowrap tdoverflowmax100">'.$supplierorderstatic->getNomUrl(1).'</td>';
+				print '<td class="nowraponall tdoverflowmax100">'.$supplierorderstatic->getNomUrl(1).'</td>';
 				print '<td class="nowrap tdoverflowmax100">'.$companystatic->getNomUrl(1, 'supplier').'</td>';
 				print '<td class="nowrap right tdamount amount">'.price(!empty($conf->global->MAIN_DASHBOARD_USE_TOTAL_HT) ? $obj->total_ht : $obj->total_ttc).'</td>';
 				print '</tr>';
@@ -501,7 +505,7 @@ if ((!empty($conf->fournisseur->enabled) && empty($conf->global->MAIN_USE_NEW_SU
 			}
 		}
 
-		addSummaryTableLine(3, $num, $nbofloop, $total, "NoProposal");
+		addSummaryTableLine(3, $num, $nbofloop, $total, "NoOrder");
 		finishSimpleTable(true);
 
 		$db->free($resql);
@@ -569,8 +573,9 @@ if (!empty($conf->ficheinter->enabled)) {
 				$companystatic->email = $obj->email;
 				$companystatic->entity = $obj->entity;
 				$companystatic->canvas = $obj->canvas;
+
 				print '<tr class="oddeven">';
-				print '<td class="nowrap tdoverflowmax100">';
+				print '<td class="nowraponall tdoverflowmax100">';
 				print $fichinterstatic->getNomUrl(1);
 				print "</td>";
 				print '<td class="nowrap tdoverflowmax100">';
@@ -604,9 +609,15 @@ if (!empty($conf->societe->enabled) && $user->rights->societe->lire) {
 	if (empty($user->rights->societe->client->voir) && !$socid) {
 		$sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = ".((int) $user->id);
 	}
-	if ($socid) {
-		$sql .= " AND s.rowid = $socid";
+	// Add where from hooks
+	$parameters = array('socid' => $socid);
+	$reshook = $hookmanager->executeHooks('printFieldListWhere', $parameters, $companystatic); // Note that $action and $object may have been modified by hook
+	if (empty($reshook)) {
+		if ($socid > 0) {
+			$sql .= " AND s.rowid = ".((int) $socid);
+		}
 	}
+	$sql .= $hookmanager->resPrint;
 	$sql .= " ORDER BY s.tms DESC";
 	$sql .= $db->plimit($max, 0);
 
@@ -644,7 +655,7 @@ if (!empty($conf->societe->enabled) && $user->rights->societe->lire) {
 				$companystatic->canvas = $objp->canvas;
 
 				print '<tr class="oddeven">';
-				print '<td class="nowrap tdoverflowmax100">'.$companystatic->getNomUrl(1, 'customer').'</td>';
+				print '<td class="nowraponall tdoverflowmax100">'.$companystatic->getNomUrl(1, 'customer').'</td>';
 				print '<td class="nowrap">';
 				//print $companystatic->getLibCustProspStatut();
 
@@ -664,7 +675,11 @@ if (!empty($conf->societe->enabled) && $user->rights->societe->lire) {
 				print $s;
 
 				print '</td>';
-				print '<td class="right nowrap tddate">'.dol_print_date($db->jdate($objp->tms), 'day').'</td>';
+
+				$datem = $db->jdate($objp->tms);
+				print '<td class="right nowrap tddate" title="'.dol_escape_htmltag($langs->trans("DateModification").': '.dol_print_date($datem, 'dayhour', 'tzuserrel')).'">';
+				print dol_print_date($datem, 'day', 'tzuserrel');
+				print '</td>';
 				print '</tr>';
 
 				$i++;
@@ -700,9 +715,15 @@ if (((!empty($conf->fournisseur->enabled) && empty($conf->global->MAIN_USE_NEW_S
 	if (empty($user->rights->societe->client->voir) && !$user->socid) {
 		$sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = ".((int) $user->id);
 	}
-	if ($socid) {
-		$sql .= " AND s.rowid = ".((int) $socid);
+	// Add where from hooks
+	$parameters = array('socid' => $socid);
+	$reshook = $hookmanager->executeHooks('printFieldListWhere', $parameters, $companystatic); // Note that $action and $object may have been modified by hook
+	if (empty($reshook)) {
+		if ($socid > 0) {
+			$sql .= " AND s.rowid = ".((int) $socid);
+		}
 	}
+	$sql .= $hookmanager->resPrint;
 	$sql .= " ORDER BY s.datec DESC";
 	$sql .= $db->plimit($max, 0);
 
@@ -731,7 +752,7 @@ if (((!empty($conf->fournisseur->enabled) && empty($conf->global->MAIN_USE_NEW_S
 				$companystatic->canvas = $objp->canvas;
 
 				print '<tr class="oddeven">';
-				print '<td class="nowrap tdoverflowmax100">'.$companystatic->getNomUrl(1, 'supplier').'</td>';
+				print '<td class="nowraponall tdoverflowmax100">'.$companystatic->getNomUrl(1, 'supplier').'</td>';
 				print '<td>';
 
 				$obj = $companystatic;
@@ -749,7 +770,11 @@ if (((!empty($conf->fournisseur->enabled) && empty($conf->global->MAIN_USE_NEW_S
 				print $s;
 
 				print '</td>';
-				print '<td class="right tddate">'.dol_print_date($db->jdate($objp->dm), 'day').'</td>';
+
+				$datem = $db->jdate($objp->dm);
+				print '<td class="right tddate" title="'.dol_escape_htmltag($langs->trans("DateModification").': '.dol_print_date($datem, 'dayhour', 'tzuserrel')).'">';
+				print dol_print_date($datem, 'day', 'tzuserrel');
+				print '</td>';
 				print '</tr>';
 
 				$i++;
@@ -841,8 +866,8 @@ if (!empty($conf->contrat->enabled) && $user->rights->contrat->lire && 0) { // T
 				$staticcontrat->ref = $obj->ref;
 
 				print '<tr class="oddeven">';
-				print '<td>'.$staticcontrat->getNomUrl(1).'</td>';
-				print '<td>'.$companystatic->getNomUrl(1, 'customer', 44).'</td>';
+				print '<td class="nowraponall">'.$staticcontrat->getNomUrl(1).'</td>';
+				print '<td class="tdoverflowmax150">'.$companystatic->getNomUrl(1, 'customer', 44).'</td>';
 				print '<td class="right">'.$staticcontrat->LibStatut($obj->statut, 3).'</td>';
 				print '</tr>';
 
@@ -938,7 +963,7 @@ if (!empty($conf->propal->enabled) && $user->rights->propal->lire) {
 
 				print '<td class="nowrap" width="140">';
 				print '<table class="nobordernopadding"><tr class="nocellnopadd">';
-				print '<td class="nobordernopadding nowrap">'.$propalstatic->getNomUrl(1).'</td>';
+				print '<td class="nobordernopadding nowraponall">'.$propalstatic->getNomUrl(1).'</td>';
 				print '<td width="18" class="nobordernopadding nowrap">'.$warning.'</td>';
 				print '<td width="16" align="center" class="nobordernopadding">'.$formfile->getDocumentsLink($propalstatic->element, $filename, $filedir).'</td>';
 				print '</tr>';
@@ -946,7 +971,10 @@ if (!empty($conf->propal->enabled) && $user->rights->propal->lire) {
 				print '</td>';
 
 				print '<td class="nowrap">'.$companystatic->getNomUrl(1, 'customer', 44).'</td>';
-				print '<td class="right tddate">'.dol_print_date($db->jdate($obj->dp), 'day').'</td>';
+				$datem = $db->jdate($obj->dp);
+				print '<td class="center tddate" title="'.dol_escape_htmltag($langs->trans("Date").': '.dol_print_date($datem, 'day', 'tzserver')).'">';
+				print dol_print_date($datem, 'day', 'tzserver');
+				print '</td>';
 				print '<td class="right tdamount amount">'.price(!empty($conf->global->MAIN_DASHBOARD_USE_TOTAL_HT) ? $obj->total_ht : $obj->total_ttc).'</td>';
 				print '<td align="center" width="14">'.$propalstatic->LibStatut($obj->fk_statut, 3).'</td>';
 
@@ -1055,7 +1083,7 @@ if (!empty($conf->commande->enabled) && $user->rights->commande->lire) {
 
 				print '<td class="nowrap" width="140">';
 				print '<table class="nobordernopadding"><tr class="nocellnopadd">';
-				print '<td class="nobordernopadding nowrap">'.$orderstatic->getNomUrl(1).'</td>';
+				print '<td class="nobordernopadding nowraponall">'.$orderstatic->getNomUrl(1).'</td>';
 				print '<td width="18" class="nobordernopadding nowrap"></td>';
 				print '<td width="16" align="center" class="nobordernopadding">'.$formfile->getDocumentsLink($orderstatic->element, $filename, $filedir).'</td>';
 				print '</tr>';
@@ -1063,7 +1091,11 @@ if (!empty($conf->commande->enabled) && $user->rights->commande->lire) {
 				print '</td>';
 
 				print '<td class="nowrap">'.$companystatic->getNomUrl(1, 'customer', 44).'</td>';
-				print '<td class="right tddate">'.dol_print_date($db->jdate($obj->dv), 'day').'</td>';
+				$datem = $db->jdate($obj->dv);
+				print '<td class="center tddate" title="'.dol_escape_htmltag($langs->trans("DateValue").': '.dol_print_date($datem, 'day', 'tzserver')).'">';
+				print dol_print_date($datem, 'day', 'tzserver');
+				print '</td>';
+
 				print '<td class="right tdamount amount">'.price(!empty($conf->global->MAIN_DASHBOARD_USE_TOTAL_HT) ? $obj->total_ht : $obj->total_ttc).'</td>';
 				print '<td align="center" width="14">'.$orderstatic->LibStatut($obj->fk_statut, $obj->billed, 3).'</td>';
 

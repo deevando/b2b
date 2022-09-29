@@ -4,11 +4,9 @@ class ActionsConvertprice {
 	
 	function doActions($parameters, $object, $action) {
         global $conf, $inputalsopricewithtax;
-
-        $inputalsopricewithtax = 1;
+		$inputalsopricewithtax = 1;
         $conf->global->MAIN_FEATURES_LEVEL = 2;
-
-        return 0;
+		return 0;
     }
 
     function formObjectOptions($parameters, $object, $action) {
@@ -41,7 +39,16 @@ class ActionsConvertprice {
 									if (tva == 0) jQuery("#price_ht").val($(this).val());
 									else {
 										var calc_arrondi = ' . ($conf->global->MAIN_MAX_DECIMALS_UNIT ? $conf->global->MAIN_MAX_DECIMALS_UNIT : 5) . ' * 100;
-										jQuery("#price_ht").val(Math.round($(this).val() / (1 + tva/100) * calc_arrondi) / calc_arrondi);
+										var importe = $(this).val();
+										var importetxt = importe.toString();
+										importetxt = importetxt.replace(",",".");
+										importe = parseFloat(importetxt);
+										
+										var valorht = Math.round(importe / (1 + tva/100) * calc_arrondi) / calc_arrondi;
+										var valorhttxt = valorht.toString();
+										valorhttxt = valorhttxt.replace(".",",");
+										jQuery("#price_ht").val(valorhttxt);
+										
 									}
 								});
                                 jQuery("#tva_tx").change(function() {
@@ -56,7 +63,15 @@ class ActionsConvertprice {
 									if (tva == 0) jQuery("#price_ttc").val($(this).val());
 									else {
 										var calc_arrondi = ' . ($conf->global->MAIN_MAX_DECIMALS_UNIT ? $conf->global->MAIN_MAX_DECIMALS_UNIT : 5) . ' * 100;
-										jQuery("#price_ttc").val(Math.round($(this).val() * (1 + tva/100) * calc_arrondi) / calc_arrondi);
+										var importe = $(this).val();
+										var importetxt = importe.toString();
+										importetxt = importetxt.replace(",",".");
+										importe = parseFloat(importetxt);
+
+										var valorttc = Math.round(importe * (1 + tva/100) * calc_arrondi) / calc_arrondi;
+										var valorttctxt = valorttc.toString();
+										valorttctxt = valorttctxt.replace(".",",");
+										jQuery("#price_ttc").val(valorttctxt);
 									}
 								});
 							});

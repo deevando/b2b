@@ -112,6 +112,7 @@ class Nombre extends CommonObject
 		'Nombre' => array('type'=>'varchar(128)', 'label'=>'Nombre', 'enabled'=>'1', 'position'=>22, 'notnull'=>1, 'visible'=>1,),
 		'Direccion' => array('type'=>'varchar(128)', 'label'=>'Direccion', 'enabled'=>'1', 'position'=>23, 'notnull'=>1, 'visible'=>1,),
 		'Telefono' => array('type'=>'varchar(128)', 'label'=>'Telefono', 'enabled'=>'1', 'position'=>24, 'notnull'=>1, 'visible'=>1,),
+		'fec_compra' => array('type'=>'datetime', 'label'=>'Fecha Compra', 'enabled'=>'1', 'position'=>50, 'notnull'=>1, 'visible'=>1, 'searchall'=>1,),
 	);
 	public $rowid;
 	public $ref;
@@ -125,6 +126,7 @@ class Nombre extends CommonObject
 	public $Nombre;
 	public $Direccion;
 	public $Telefono;
+	public $fec_compra;
 	// END MODULEBUILDER PROPERTIES
 
 

@@ -5916,6 +5916,9 @@ class FactureLigne extends CommonInvoiceLine
 		if (empty($this->remise_percent)) {
 			$this->remise_percent = 0;
 		}
+		if (empty($this->remise)) {
+			$this->remise = 0;
+		}
 		if (empty($this->info_bits)) {
 			$this->info_bits = 0;
 		}
@@ -6149,6 +6152,9 @@ class FactureLigne extends CommonInvoiceLine
 		}
 		if (empty($this->remise_percent)) {
 			$this->remise_percent = 0;
+		}
+		if (empty($this->remise)) {
+			$this->remise = 0;
 		}
 		if (empty($this->info_bits)) {
 			$this->info_bits = 0;

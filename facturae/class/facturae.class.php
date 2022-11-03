@@ -182,7 +182,8 @@ class Facturae
 		        if($i==1 && $fac_third->contable) {
 					fwrite($this->file, '				<AdministrativeCentre>'.$CrLf);
                     fwrite($this->file,'					<CentreCode>' . $fac_third->contable . '</CentreCode>' . $CrLf);
-                    fwrite($this->file,'					<Name>' . substr($fac_third->name_contable,0,40) . '</Name>' . $CrLf);
+                    fwrite($this->file, '					<RoleTypeCode>0' . $i . '</RoleTypeCode>' . $CrLf);
+					fwrite($this->file,'					<Name>' . substr($fac_third->name_contable,0,40) . '</Name>' . $CrLf);
                     $existe_centro = true;
                 }
 		        if($i==2 && $fac_third->gestor) {

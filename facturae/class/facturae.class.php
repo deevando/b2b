@@ -366,15 +366,15 @@ class Facturae
 			fwrite($this->file, '            		<ItemDescription>'.dol_html_entity_decode(dol_string_nohtmltag(trim($line->product_ref.' '.$line->product_label.' '.$line->product_desc.' '.$line->desc)),ENT_QUOTES).'</ItemDescription>'.$CrLf);  //TODO descripción de la línea
 			fwrite($this->file, '            		<Quantity>'.number_format($line->qty,2,'.','').'</Quantity>'.$CrLf);  //unidades de la línea
 	        //fwrite($this->file, '            		<UnitOfMeasure>01</UnitOfMeasure>'.$CrLf);  // unidades de medida
-	        fwrite($this->file, '            		<UnitPriceWithoutTax>'.number_format($line->subprice,6,'.','').'</UnitPriceWithoutTax>'.$CrLf);  //precio unitario
-	        fwrite($this->file, '            		<TotalCost>'.number_format($line->subprice*$line->qty,6,'.','').'</TotalCost>'.$CrLf);  //total linea
+	        fwrite($this->file, '            		<UnitPriceWithoutTax>'.number_format($line->subprice,2,'.','').'</UnitPriceWithoutTax>'.$CrLf);  //precio unitario
+	        fwrite($this->file, '            		<TotalCost>'.number_format($line->subprice*$line->qty,2,'.','').'</TotalCost>'.$CrLf);  //total linea
 	        //aquí un if descuento
 	        if($line->remise_percent > 0){
 		        fwrite($this->file, '            		<DiscountsAndRebates>'.$CrLf);
 				fwrite($this->file, '	            		<Discount>'.$CrLf);
 		        fwrite($this->file, '    	        			<DiscountReason>'.$langs->trans("ComercialDiscount").'</DiscountReason>'.$CrLf);//Razón descuento
-		        fwrite($this->file, '        	    			<DiscountRate>'.number_format($line->remise_percent,4,'.','').'</DiscountRate>'.$CrLf);//% de descuento
-		        fwrite($this->file, '            				<DiscountAmount>'.number_format($line->subprice*$line->qty - $line->total_ht,6,'.','').'</DiscountAmount>'.$CrLf);//importe de descuento
+		        fwrite($this->file, '        	    			<DiscountRate>'.number_format($line->remise_percent,2,'.','').'</DiscountRate>'.$CrLf);//% de descuento
+		        fwrite($this->file, '            				<DiscountAmount>'.number_format($line->subprice*$line->qty - $line->total_ht,2,'.','').'</DiscountAmount>'.$CrLf);//importe de descuento
 		        fwrite($this->file, '            			</Discount>'.$CrLf);
 		        fwrite($this->file, '	            	</DiscountsAndRebates>'.$CrLf);
 	        }
@@ -387,7 +387,7 @@ class Facturae
 	        	fwrite($this->file, '            			</Charge>'.$CrLf);
 	        	fwrite($this->file, '            		</Charges>'.$CrLf);
 	        }*/
-	        fwrite($this->file, '    	        	<GrossAmount>'.number_format($line->total_ht,6,'.','').'</GrossAmount>'.$CrLf); //Importe bruto con descuentos aplicados
+	        fwrite($this->file, '    	        	<GrossAmount>'.number_format($line->total_ht,2,'.','').'</GrossAmount>'.$CrLf); //Importe bruto con descuentos aplicados
 	        if($line->total_localtax2 < 0){
 	        	fwrite($this->file, '            		<TaxesWithheld>'.$CrLf);
 	        	fwrite($this->file, '            			<Tax>'.$CrLf);

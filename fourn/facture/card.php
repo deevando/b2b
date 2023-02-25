@@ -1131,7 +1131,7 @@ if (empty($reshook)) {
 								$descline = '(DEPOSIT)';
 								//$descline.= ' - '.$langs->trans($arraylist[$typeamount]);
 								if ($typeamount == 'amount') {
-									$descline .= ' ('.price($valuedeposit, '', $langs, 0, - 1, - 1, (!empty($object->multicurrency_code) ? $object->multicurrency_code : $conf->currency)).')';
+									$descline .= ' ('.price($valuedeposit, '', $langs, 1, 2, 2, (!empty($object->multicurrency_code) ? $object->multicurrency_code : $conf->currency)).')';
 								} elseif ($typeamount == 'variable') {
 									$descline .= ' ('.$valuedeposit.'%)';
 								}
@@ -2101,7 +2101,7 @@ if ($action == 'create') {
 						print ' selected';
 						$exampletemplateinvoice->fetch($fac_recid);
 					}
-					print '>'.$objp->title.' ('.price($objp->total_ttc).' '.$langs->trans("TTC").')</option>';
+					print '>'.$objp->title.' ('.price($objp->total_ttc,'', $langs, 1, 2, 2, $conf->currency).' '.$langs->trans("TTC").')</option>';
 					$i++;
 				}
 				print '</select>';
@@ -2441,8 +2441,8 @@ if ($action == 'create') {
 			$dateexample = dol_now();
 		}
 		$substitutionarray = array(
-			'__TOTAL_HT__' => $langs->trans("AmountHT").' ('.$langs->trans("Example").': '.price($exampletemplateinvoice->total_ht).')',
-			'__TOTAL_TTC__' =>  $langs->trans("AmountTTC").' ('.$langs->trans("Example").': '.price($exampletemplateinvoice->total_ttc).')',
+			'__TOTAL_HT__' => $langs->trans("AmountHT").' ('.$langs->trans("Example").': '.price($exampletemplateinvoice->total_ht,'', $langs, 1, 2, 2, $conf->currency).')',
+			'__TOTAL_TTC__' =>  $langs->trans("AmountTTC").' ('.$langs->trans("Example").': '.price($exampletemplateinvoice->total_ttc,'', $langs, 1, 2, 2, $conf->currency).')',
 			'__INVOICE_PREVIOUS_MONTH__' => $langs->trans("PreviousMonthOfInvoice").' ('.$langs->trans("Example").': '.dol_print_date(dol_time_plus_duree($dateexample, -1, 'm'), '%m').')',
 			'__INVOICE_MONTH__' =>  $langs->trans("MonthOfInvoice").' ('.$langs->trans("Example").': '.dol_print_date($dateexample, '%m').')',
 			'__INVOICE_NEXT_MONTH__' => $langs->trans("NextMonthOfInvoice").' ('.$langs->trans("Example").': '.dol_print_date(dol_time_plus_duree($dateexample, 1, 'm'), '%m').')',
@@ -2523,21 +2523,21 @@ if ($action == 'create') {
 		}
 
 		print '</td></tr>';
-		print '<tr><td>'.$langs->trans('AmountHT').'</td><td>'.price($objectsrc->total_ht).'</td></tr>';
-		print '<tr><td>'.$langs->trans('AmountVAT').'</td><td>'.price($objectsrc->total_tva)."</td></tr>";
+		print '<tr><td>'.$langs->trans('AmountHT').'</td><td>'.price($objectsrc->total_ht,'', $langs, 1, 2, 2, $conf->currency).'</td></tr>';
+		print '<tr><td>'.$langs->trans('AmountVAT').'</td><td>'.price($objectsrc->total_tva,'', $langs, 1, 2, 2, $conf->currency)."</td></tr>";
 		if ($mysoc->localtax1_assuj == "1" || $object->total_localtax1 != 0) { //Localtax1
-			print '<tr><td>'.$langs->transcountry("AmountLT1", $mysoc->country_code).'</td><td>'.price($objectsrc->total_localtax1)."</td></tr>";
+			print '<tr><td>'.$langs->transcountry("AmountLT1", $mysoc->country_code).'</td><td>'.price($objectsrc->total_localtax1,'', $langs, 1, 2, 2, $conf->currency)."</td></tr>";
 		}
 
 		if ($mysoc->localtax2_assuj == "1" || $object->total_localtax2 != 0) { //Localtax2
-			print '<tr><td>'.$langs->transcountry("AmountLT2", $mysoc->country_code).'</td><td>'.price($objectsrc->total_localtax2)."</td></tr>";
+			print '<tr><td>'.$langs->transcountry("AmountLT2", $mysoc->country_code).'</td><td>'.price($objectsrc->total_localtax2,'', $langs, 1, 2, 2, $conf->currency)."</td></tr>";
 		}
-		print '<tr><td>'.$langs->trans('AmountTTC').'</td><td>'.price($objectsrc->total_ttc)."</td></tr>";
+		print '<tr><td>'.$langs->trans('AmountTTC').'</td><td>'.price($objectsrc->total_ttc,'', $langs, 1, 2, 2, $conf->currency)."</td></tr>";
 
 		if (!empty($conf->multicurrency->enabled)) {
-			print '<tr><td>'.$langs->trans('MulticurrencyAmountHT').'</td><td>'.price($objectsrc->multicurrency_total_ht).'</td></tr>';
-			print '<tr><td>'.$langs->trans('MulticurrencyAmountVAT').'</td><td>'.price($objectsrc->multicurrency_total_tva)."</td></tr>";
-			print '<tr><td>'.$langs->trans('MulticurrencyAmountTTC').'</td><td>'.price($objectsrc->multicurrency_total_ttc)."</td></tr>";
+			print '<tr><td>'.$langs->trans('MulticurrencyAmountHT').'</td><td>'.price($objectsrc->multicurrency_total_ht,'', $langs, 1, 2, 2, $conf->currency).'</td></tr>';
+			print '<tr><td>'.$langs->trans('MulticurrencyAmountVAT').'</td><td>'.price($objectsrc->multicurrency_total_tva,'', $langs, 1, 2, 2, $conf->currency)."</td></tr>";
+			print '<tr><td>'.$langs->trans('MulticurrencyAmountTTC').'</td><td>'.price($objectsrc->multicurrency_total_ttc,'', $langs, 1, 2, 2, $conf->currency)."</td></tr>";
 		}
 	}
 
@@ -3171,23 +3171,23 @@ if ($action == 'create') {
 		if (!empty($conf->multicurrency->enabled) && ($object->multicurrency_code != $conf->currency)) {
 			// Multicurrency Amount HT
 			print '<tr><td class="titlefieldmiddle">'.$form->editfieldkey('MulticurrencyAmountHT', 'multicurrency_total_ht', '', $object, 0).'</td>';
-			print '<td class="nowrap right amountcard">'.price($object->multicurrency_total_ht, '', $langs, 0, - 1, - 1, (!empty($object->multicurrency_code) ? $object->multicurrency_code : $conf->currency)).'</td>';
+			print '<td class="nowrap right amountcard">'.price($object->multicurrency_total_ht, '', $langs, 1, 2, 2, (!empty($object->multicurrency_code) ? $object->multicurrency_code : $conf->currency)).'</td>';
 			print '</tr>';
 
 			// Multicurrency Amount VAT
 			print '<tr><td>'.$form->editfieldkey('MulticurrencyAmountVAT', 'multicurrency_total_tva', '', $object, 0).'</td>';
-			print '<td class="nowrap right amountcard">'.price($object->multicurrency_total_tva, '', $langs, 0, - 1, - 1, (!empty($object->multicurrency_code) ? $object->multicurrency_code : $conf->currency)).'</td>';
+			print '<td class="nowrap right amountcard">'.price($object->multicurrency_total_tva, '', $langs, 1, 2, 2, (!empty($object->multicurrency_code) ? $object->multicurrency_code : $conf->currency)).'</td>';
 			print '</tr>';
 
 			// Multicurrency Amount TTC
 			print '<tr><td>'.$form->editfieldkey('MulticurrencyAmountTTC', 'multicurrency_total_ttc', '', $object, 0).'</td>';
-			print '<td class="nowrap right amountcard">'.price($object->multicurrency_total_ttc, '', $langs, 0, - 1, - 1, (!empty($object->multicurrency_code) ? $object->multicurrency_code : $conf->currency)).'</td>';
+			print '<td class="nowrap right amountcard">'.price($object->multicurrency_total_ttc, '', $langs, 1, 2, 2, (!empty($object->multicurrency_code) ? $object->multicurrency_code : $conf->currency)).'</td>';
 			print '</tr>';
 		}
 
 		// Amount
 		print '<tr><td class="titlefield">'.$langs->trans('AmountHT').'</td>';
-		print '<td class="nowrap right amountcard">'.price($object->total_ht, 1, $langs, 0, -1, -1, $conf->currency).'</td>';
+		print '<td class="nowrap right amountcard">'.price($object->total_ht, '', $langs, 1, 2, 2, $conf->currency).'</td>';
 		print '</tr>';
 
 		// VAT
@@ -3214,23 +3214,23 @@ if ($action == 'create') {
 			print '&nbsp; &nbsp; &nbsp; &nbsp;';
 			print '</div>';
 		}
-		print price($object->total_tva, 1, $langs, 0, -1, -1, $conf->currency);
+		print price($object->total_tva, '', $langs, 1, 2, 2, $conf->currency);
 		print '</td></tr>';
 
 		// Amount Local Taxes
 		//TODO: Place into a function to control showing by country or study better option
 		if ($societe->localtax1_assuj == "1") { //Localtax1
 			print '<tr><td>'.$langs->transcountry("AmountLT1", $societe->country_code).'</td>';
-			print '<td class="nowrap right amountcard">'.price($object->total_localtax1, 1, $langs, 0, -1, -1, $conf->currency).'</td>';
+			print '<td class="nowrap right amountcard">'.price($object->total_localtax1, '', $langs, 1, 2, 2, $conf->currency).'</td>';
 			print '</tr>';
 		}
 		if ($societe->localtax2_assuj == "1") { //Localtax2
 			print '<tr><td>'.$langs->transcountry("AmountLT2", $societe->country_code).'</td>';
-			print '<td class="nowrap right amountcard">'.price($object->total_localtax2, 1, $langs, 0, -1, -1, $conf->currency).'</td>';
+			print '<td class="nowrap right amountcard">'.price($object->total_localtax2, '', $langs, 1, 2, 2, $conf->currency).'</td>';
 			print '</tr>';
 		}
 		print '<tr><td>'.$langs->trans('AmountTTC').'</td>';
-		print '<td colspan="3" class="nowrap right amountcard">'.price($object->total_ttc, 1, $langs, 0, -1, -1, $conf->currency).'</td>';
+		print '<td colspan="3" class="nowrap right amountcard">'.price($object->total_ttc, '', $langs, 1, 2, 2, $conf->currency).'</td>';
 		print '</tr>';
 
 		print '</table>';
@@ -3338,7 +3338,7 @@ if ($action == 'create') {
 						}
 						print '</td>';
 					}
-					print '<td class="right">'.price($sign * $objp->amount).'</td>';
+					print '<td class="right">'.price($sign * $objp->amount,'', $langs, 1, 2, 2, $conf->currency).'</td>';
 					print '<td class="center">';
 					if ($object->statut == FactureFournisseur::STATUS_VALIDATED && $object->paye == 0 && $user->socid == 0) {
 						print '<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deletepayment&token='.newToken().'&paiement_id='.$objp->rowid.'">';
@@ -3382,8 +3382,7 @@ if ($action == 'create') {
 				print $langs->trans('AlreadyPaid');
 			}
 			print '</span>';
-			print '</td><td class="right"'.(($totalpaid > 0) ? ' class="amountalreadypaid"' : '').'>'.price($totalpaid).'</td><td>&nbsp;</td></tr>';
-
+			print '</td><td class="right"'.(($totalpaid > 0) ? ' class="amountalreadypaid"' : '').'>'.price($totalpaid,'', $langs, 1, 2, 2, $conf->currency).'</td><td>&nbsp;</td></tr>';
 			//$resteapayer = $object->total_ttc - $totalpaid;
 			$resteapayeraffiche = $resteapayer;
 
@@ -3414,7 +3413,7 @@ if ($action == 'create') {
 					}
 					print $invoice->getNomUrl(0);
 					print ' :</td>';
-					print '<td class="right">'.price($obj->amount_ttc).'</td>';
+					print '<td class="right">'.price($obj->amount_ttc,'', $langs, 1, 2, 2, $conf->currency).'</td>';
 					print '<td class="right">';
 					print '<a href="'.$_SERVER["PHP_SELF"].'?facid='.$object->id.'&action=unlinkdiscount&discountid='.$obj->rowid.'">'.img_delete().'</a>';
 					print '</td></tr>';
@@ -3436,7 +3435,7 @@ if ($action == 'create') {
 				print '<span class="opacitymedium">';
 				print $form->textwithpicto($langs->trans("Discount"), $langs->trans("HelpEscompte"), - 1);
 				print '</span>';
-				print '</td><td class="right">'.price($object->total_ttc - $creditnoteamount - $depositamount - $totalpaid).'</td><td>&nbsp;</td></tr>';
+				print '</td><td class="right">'.price($object->total_ttc - $creditnoteamount - $depositamount - $totalpaid,'', $langs, 1, 2, 2, $conf->currency).'</td><td>&nbsp;</td></tr>';
 				$resteapayeraffiche = 0;
 				$cssforamountpaymentcomplete = 'amountpaymentneutral';
 			}
@@ -3446,7 +3445,7 @@ if ($action == 'create') {
 				print '<span class="opacitymedium">';
 				print $form->textwithpicto($langs->trans("Abandoned"), $langs->trans("HelpAbandonBadCustomer"), - 1);
 				print '</span>';
-				print '</td><td class="right">'.price($object->total_ttc - $creditnoteamount - $depositamount - $totalpaid).'</td><td>&nbsp;</td></tr>';
+				print '</td><td class="right">'.price($object->total_ttc - $creditnoteamount - $depositamount - $totalpaid,'', $langs, 1, 2, 2, $conf->currency).'</td><td>&nbsp;</td></tr>';
 				// $resteapayeraffiche=0;
 				$cssforamountpaymentcomplete = 'amountpaymentneutral';
 			}
@@ -3456,7 +3455,7 @@ if ($action == 'create') {
 				print '<span class="opacitymedium">';
 				print $form->textwithpicto($langs->trans("ProductReturned"), $langs->trans("HelpAbandonProductReturned"), - 1);
 				print '</span>';
-				print '</td><td class="right">'.price($object->total_ttc - $creditnoteamount - $depositamount - $totalpaid).'</td><td>&nbsp;</td></tr>';
+				print '</td><td class="right">'.price($object->total_ttc - $creditnoteamount - $depositamount - $totalpaid,'', $langs, 1, 2, 2, $conf->currency).'</td><td>&nbsp;</td></tr>';
 				$resteapayeraffiche = 0;
 				$cssforamountpaymentcomplete = 'amountpaymentneutral';
 			}
@@ -3470,7 +3469,7 @@ if ($action == 'create') {
 				print '<span class="opacitymedium">';
 				print $form->textwithpicto($langs->trans("Abandoned"), $text, - 1);
 				print '</span>';
-				print '</td><td class="right">'.price($object->total_ttc - $creditnoteamount - $depositamount - $totalpaid).'</td><td>&nbsp;</td></tr>';
+				print '</td><td class="right">'.price($object->total_ttc - $creditnoteamount - $depositamount - $totalpaid,'', $langs, 1, 2, 2, $conf->currency).'</td><td>&nbsp;</td></tr>';
 				$resteapayeraffiche = 0;
 				$cssforamountpaymentcomplete = 'amountpaymentneutral';
 			}
@@ -3480,7 +3479,7 @@ if ($action == 'create') {
 			print '<span class="opacitymedium">';
 			print $langs->trans("Billed");
 			print '</span>';
-			print '</td><td class="right">'.price($object->total_ttc).'</td><td>&nbsp;</td></tr>';
+			print '</td><td class="right">'.price($object->total_ttc,'', $langs, 1, 2, 2, $conf->currency).'</td><td>&nbsp;</td></tr>';
 
 			// Remainder to pay
 			print '<tr><td colspan="'.$nbcols.'" class="right">';
@@ -3491,7 +3490,7 @@ if ($action == 'create') {
 			}
 			print '</span>';
 			print '</td>';
-			print '<td class="right'.($resteapayeraffiche ? ' amountremaintopay' : (' '.$cssforamountpaymentcomplete)).'">'.price($resteapayeraffiche).'</td><td>&nbsp;</td></tr>';
+			print '<td class="right'.($resteapayeraffiche ? ' amountremaintopay' : (' '.$cssforamountpaymentcomplete)).'">'.price($resteapayeraffiche,'', $langs, 1, 2, 2, $conf->currency).'</td><td>&nbsp;</td></tr>';
 
 			// Remainder to pay Multicurrency
 			if ($object->multicurrency_code != $conf->currency || $object->multicurrency_tx != 1) {
@@ -3503,7 +3502,7 @@ if ($action == 'create') {
 				}
 				print '</span>';
 				print '</td>';
-				print '<td class="right'.($resteapayeraffiche ? ' amountremaintopay' : (' '.$cssforamountpaymentcomplete)).'">'.(!empty($object->multicurrency_code) ? $object->multicurrency_code : $conf->currency).' '.price(price2num($object->multicurrency_tx*$resteapayeraffiche, 'MT')).'</td><td>&nbsp;</td></tr>';
+				print '<td class="right'.($resteapayeraffiche ? ' amountremaintopay' : (' '.$cssforamountpaymentcomplete)).'">'.(!empty($object->multicurrency_code) ? $object->multicurrency_code : $conf->currency).' '.price(price2num($object->multicurrency_tx*$resteapayeraffiche, 'MT'),'', $langs, 1, 2, 2, $conf->currency).'</td><td>&nbsp;</td></tr>';
 			}
 		} else // Credit note
 		{
@@ -3512,10 +3511,10 @@ if ($action == 'create') {
 			// Total already paid back
 			print '<tr><td colspan="'.$nbcols.'" class="right">';
 			print $langs->trans('AlreadyPaidBack');
-			print ' :</td><td class="right">'.price($sign * $totalpaid).'</td><td>&nbsp;</td></tr>';
+			print ' :</td><td class="right">'.price($sign * $totalpaid,'', $langs, 1, 2, 2, $conf->currency).'</td><td>&nbsp;</td></tr>';
 
 			// Billed
-			print '<tr><td colspan="'.$nbcols.'" class="right">'.$langs->trans("Billed").' :</td><td class="right">'.price($sign * $object->total_ttc).'</td><td>&nbsp;</td></tr>';
+			print '<tr><td colspan="'.$nbcols.'" class="right">'.$langs->trans("Billed").' :</td><td class="right">'.price($sign * $object->total_ttc,'', $langs, 1, 2, 2, $conf->currency).'</td><td>&nbsp;</td></tr>';
 
 			// Remainder to pay back
 			print '<tr><td colspan="'.$nbcols.'" class="right">';
@@ -3526,7 +3525,7 @@ if ($action == 'create') {
 			}
 			print '</td>';
 			print '</span>';
-			print '<td class="right'.($resteapayeraffiche ? ' amountremaintopay' : (' '.$cssforamountpaymentcomplete)).'">'.price($sign * $resteapayeraffiche).'</td><td>&nbsp;</td></tr>';
+			print '<td class="right'.($resteapayeraffiche ? ' amountremaintopay' : (' '.$cssforamountpaymentcomplete)).'">'.price($sign * $resteapayeraffiche,'', $langs, 1, 2, 2, $conf->currency).'</td><td>&nbsp;</td></tr>';
 
 			// Remainder to pay back Multicurrency
 			if ($object->multicurrency_code != $conf->currency || $object->multicurrency_tx != 1) {
@@ -3538,7 +3537,7 @@ if ($action == 'create') {
 				}
 				print '</span>';
 				print '</td>';
-				print '<td class="right'.($resteapayeraffiche ? ' amountremaintopay' : (' '.$cssforamountpaymentcomplete)).'">'.(!empty($object->multicurrency_code) ? $object->multicurrency_code : $conf->currency).' '.price(price2num($sign * $object->multicurrency_tx * $resteapayeraffiche, 'MT')).'</td><td>&nbsp;</td></tr>';
+				print '<td class="right'.($resteapayeraffiche ? ' amountremaintopay' : (' '.$cssforamountpaymentcomplete)).'">'.(!empty($object->multicurrency_code) ? $object->multicurrency_code : $conf->currency).' '.price(price2num($sign * $object->multicurrency_tx * $resteapayeraffiche, 'MT'),'', $langs, 1, 2, 2, $conf->currency).'</td><td>&nbsp;</td></tr>';
 			}
 
 			// Sold credit note

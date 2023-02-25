@@ -32,6 +32,7 @@ if ($_POST['submitPayment']) {
     $version = "HMAC_SHA256_V1"; 
     $name = "DEEVANDO INFORMATICA";
     $order = date('dmyHis');
+    //$order = "FCVE2023-00025";
     $amount = $amount * 100;
     $currency = "978";
     $consumerlng = "001";
@@ -39,7 +40,7 @@ if ($_POST['submitPayment']) {
     $urlMerchant = "https://www.deevando.es/";
     $urlweb_ok = 'https://b2b.deevando.com/public/ticket/create_ticket.php?refpag='.$order;
     $urlweb_ko = 'https://b2b.deevando.com/public/ticket/index.php';
-    $numpedido = 'Pedido ' . $numpedido;
+    $numpedido =  $numpedido;
  
     $miObj->setParameter("DS_MERCHANT_AMOUNT", $amount);
     $miObj->setParameter("DS_MERCHANT_CURRENCY", $currency);
@@ -77,15 +78,16 @@ if ($_POST['submitPayment']) {
 echo "PASARELA DE PAGO - Compruebe el importe y el número de pedido.";
 $amount = $_GET['importe'];
 $numpedido = $_GET['pedido'];
+
 ?>
 
-<form class="form-amount" action="pagotpv.php" method="post">
+<form class="form-amount" action="pagotpv15min.php" method="post">
     <div class="form-group">
        <!-- <label for="amount">Cantidad</label> -->
-        <input type="hidden" id="amount" name="amount" class="form-control" placeholder="Por ejemplo: 50.00" value=$amount;>
+        <input type="hidden" id="amount" name="amount" class="form-control" placeholder="Por ejemplo: 50.00" value="20.00";>
         <BR>
        <!-- <label for="order">Pedido</label> -->
-        <input type="hidden" id="pedido" name="numpedido" class="form-control" placeholder="Por ejemplo: 123443" value=$numpedido;>
+        <input type="hidden" id="pedido" name="numpedido" class="form-control" placeholder="Por ejemplo: 123443" value="FCVE2023-00025 - REMOTO EXPRESS 15 Min";>
     </div>
     <br>
     <input class="btn btn-lg btn-primary btn-block" name="submitPayment" type="submit" value="Pagar">

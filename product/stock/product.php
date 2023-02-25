@@ -655,6 +655,8 @@ if ($id > 0 || $ref) {
 			if ($object->pmp > 0) {
 				print price($object->pmp).' '.$langs->trans("HT");
 			}
+		//	print $form->editfieldkey($text, 'pmp', $object->pmp, $object, $usercancreate, 'amount:6');
+		//	print $form->editfieldval($text, 'pmp', $object->pmp, $object, $usercancreate, 'amount:6');
 			print '</td>';
 			print '</tr>';
 

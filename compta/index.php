@@ -238,9 +238,9 @@ if (isModEnabled('facture') && !empty($user->rights->facture->lire)) {
 				print $thirdpartystatic->getNomUrl(1, 'customer', 44);
 				print '</td>';
 				if (!empty($conf->global->MAIN_SHOW_HT_ON_SUMMARY)) {
-					print '<td class="nowrap right"><span class="amount">'.price($obj->total_ht).'</span></td>';
+					print '<td class="nowrap right"><span class="amount">'.price($obj->total_ht,'', $langs, 1, 2, 2, $conf->currency).'</span></td>';
 				}
-				print '<td class="nowrap right"><span class="amount">'.price($obj->total_ttc).'</span></td>';
+				print '<td class="nowrap right"><span class="amount">'.price($obj->total_ttc,'', $langs, 1, 2, 2, $conf->currency).'</span></td>';
 
 				print '<td class="right" title="'.dol_escape_htmltag($langs->trans("DateModificationShort").' : '.dol_print_date($db->jdate($obj->tms), 'dayhour', 'tzuserrel')).'">'.dol_print_date($db->jdate($obj->tms), 'day', 'tzuserrel').'</td>';
 
@@ -369,9 +369,9 @@ if ((isModEnabled('fournisseur') && empty($conf->global->MAIN_USE_NEW_SUPPLIERMO
 				print $thirdpartystatic->getNomUrl(1, 'supplier');
 				print '</td>';
 				if (!empty($conf->global->MAIN_SHOW_HT_ON_SUMMARY)) {
-					print '<td class="right"><span class="amount">'.price($obj->total_ht).'</span></td>';
+					print '<td class="right"><span class="amount">'.price($obj->total_ht,'', $langs, 1, 2, 2, $conf->currency).'</span></td>';
 				}
-				print '<td class="nowrap right"><span class="amount">'.price($obj->total_ttc).'</span></td>';
+				print '<td class="nowrap right"><span class="amount">'.price($obj->total_ttc,'', $langs, 1, 2, 2, $conf->currency).'</span></td>';
 				print '<td class="right" title="'.dol_escape_htmltag($langs->trans("DateModificationShort").' : '.dol_print_date($db->jdate($obj->tms), 'dayhour', 'tzuserrel')).'">'.dol_print_date($db->jdate($obj->tms), 'day', 'tzuserrel').'</td>';
 				$alreadypaid = $facstatic->getSommePaiement();
 				print '<td>'.$facstatic->getLibStatut(3, $alreadypaid).'</td>';
@@ -468,7 +468,7 @@ if (isModEnabled('don') && !empty($user->rights->don->lire)) {
 				print '<tr class="oddeven tdoverflowmax100">';
 				print '<td>'.$donationstatic->getNomUrl(1).'</td>';
 				print '<td>'.$label.'</td>';
-				print '<td class="nowrap right"><span class="amount">'.price($obj->amount).'</span></td>';
+				print '<td class="nowrap right"><span class="amount">'.price($obj->amount,'', $langs, 1, 2, 2, $conf->currency).'</span></td>';
 				print '<td class="right" title="'.dol_escape_htmltag($langs->trans("DateModificationShort").' : '.dol_print_date($db->jdate($obj->dm), 'dayhour', 'tzuserrel')).'">'.dol_print_date($db->jdate($obj->dm), 'day', 'tzuserrel').'</td>';
 				print '<td>'.$donationstatic->getLibStatut(3).'</td>';
 				print '</tr>';
@@ -551,8 +551,8 @@ if (isModEnabled('tax') && !empty($user->rights->tax->charges->lire)) {
 					print '<tr class="oddeven">';
 					print '<td class="nowraponall">'.$chargestatic->getNomUrl(1).'</td>';
 					print '<td class="center">'.dol_print_date($db->jdate($obj->date_ech), 'day').'</td>';
-					print '<td class="nowrap right"><span class="amount">'.price($obj->amount).'</span></td>';
-					print '<td class="nowrap right"><span class="amount">'.price($obj->sumpaid).'</span></td>';
+					print '<td class="nowrap right"><span class="amount">'.price($obj->amount,'', $langs, 1, 2, 2, $conf->currency).'</span></td>';
+					print '<td class="nowrap right"><span class="amount">'.price($obj->sumpaid,'', $langs, 1, 2, 2, $conf->currency).'</span></td>';
 					print '<td class="center">'.$chargestatic->getLibStatut(3).'</td>';
 					print '</tr>';
 
@@ -569,7 +569,7 @@ if (isModEnabled('tax') && !empty($user->rights->tax->charges->lire)) {
 				}
 
 				print '<tr class="liste_total"><td class="left" colspan="2">'.$langs->trans("Total").'</td>';
-				print '<td class="nowrap right">'.price($tot_ttc).'</td>';
+				print '<td class="nowrap right">'.price($tot_ttc,'', $langs, 1, 2, 2, $conf->currency).'</td>';
 				print '<td class="right"></td>';
 				print '<td class="right">&nbsp;</td>';
 				print '</tr>';
@@ -700,10 +700,10 @@ if (isModEnabled('facture') && isModEnabled('commande') && $user->rights->comman
 				print $societestatic->getNomUrl(1, 'customer');
 				print '</td>';
 				if (!empty($conf->global->MAIN_SHOW_HT_ON_SUMMARY)) {
-					print '<td class="right"><span class="amount">'.price($obj->total_ht).'</span></td>';
+					print '<td class="right"><span class="amount">'.price($obj->total_ht,'', $langs, 1, 2, 2, $conf->currency).'</span></td>';
 				}
-				print '<td class="nowrap right"><span class="amount">'.price($obj->total_ttc).'</span></td>';
-				print '<td class="nowrap right"><span class="amount">'.price($obj->total_ttc - $obj->tot_fttc).'</span></td>';
+				print '<td class="nowrap right"><span class="amount">'.price($obj->total_ttc,'', $langs, 1, 2, 2, $conf->currency).'</span></td>';
+				print '<td class="nowrap right"><span class="amount">'.price($obj->total_ttc - $obj->tot_fttc,'', $langs, 1, 2, 2, $conf->currency).'</span></td>';
 				print '<td>'.$commandestatic->getLibStatut(3).'</td>';
 				print '</tr>';
 				$tot_ht += $obj->total_ht;
@@ -721,12 +721,12 @@ if (isModEnabled('facture') && isModEnabled('commande') && $user->rights->comman
 				print "</tr>\n";
 			}
 
-			print '<tr class="liste_total"><td colspan="2">'.$langs->trans("Total").' &nbsp; <span style="font-weight: normal">('.$langs->trans("RemainderToBill").': '.price($tot_tobill).')</span> </td>';
+			print '<tr class="liste_total"><td colspan="2">'.$langs->trans("Total").' &nbsp; <span style="font-weight: normal">('.$langs->trans("RemainderToBill").': '.price($tot_tobill,'', $langs, 1, 2, 2, $conf->currency).')</span> </td>';
 			if (!empty($conf->global->MAIN_SHOW_HT_ON_SUMMARY)) {
-				print '<td class="right">'.price($tot_ht).'</td>';
+				print '<td class="right">'.price($tot_ht,'', $langs, 1, 2, 2, $conf->currency).'</td>';
 			}
-			print '<td class="nowrap right">'.price($tot_ttc).'</td>';
-			print '<td class="nowrap right">'.price($tot_tobill).'</td>';
+			print '<td class="nowrap right">'.price($tot_ttc,'', $langs, 1, 2, 2, $conf->currency).'</td>';
+			print '<td class="nowrap right">'.price($tot_tobill,'', $langs, 1, 2, 2, $conf->currency).'</td>';
 			print '<td>&nbsp;</td>';
 			print '</tr>';
 			print '</table></div><br>';

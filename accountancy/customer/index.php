@@ -418,10 +418,10 @@ if ($resql) {
 			$tmp = dol_getdate(dol_get_last_day($cursoryear, $cursormonth, 'gmt'), false, 'gmt');
 
 			print '<td class="right nowraponall amount">';
-			print price($row[$i]);
+			print price($row[$i],'', $langs, 1, 2, 2, $conf->currency);
 			print '</td>';
 		}
-		print '<td class="right nowraponall amount"><b>'.price($row[14]).'</b></td>';
+		print '<td class="right nowraponall amount"><b>'.price($row[14],'', $langs, 1, 2, 2, $conf->currency).'</b></td>';
 		print '</tr>';
 	}
 	$db->free($resql);
@@ -538,10 +538,10 @@ if ($resql) {
 			$tmp = dol_getdate(dol_get_last_day($cursoryear, $cursormonth, 'gmt'), false, 'gmt');
 
 			print '<td class="right nowraponall amount">';
-			print price($row[$i]);
+			print price($row[$i],'', $langs, 1, 2, 2, $conf->currency);
 			print '</td>';
 		}
-		print '<td class="right nowraponall amount"><b>'.price($row[14]).'</b></td>';
+		print '<td class="right nowraponall amount"><b>'.price($row[14],'', $langs, 1, 2, 2, $conf->currency).'</b></td>';
 		print '</tr>';
 	}
 	$db->free($resql);
@@ -612,9 +612,9 @@ if ($conf->global->MAIN_FEATURES_LEVEL > 0) { // This part of code looks strange
 		while ($row = $db->fetch_row($resql)) {
 			print '<tr><td>'.$row[0].'</td>';
 			for ($i = 1; $i <= 12; $i++) {
-				print '<td class="right nowraponall amount">'.price($row[$i]).'</td>';
+				print '<td class="right nowraponall amount">'.price($row[$i],'', $langs, 1, 2, 2, $conf->currency).'</td>';
 			}
-			print '<td class="right nowraponall amount"><b>'.price($row[13]).'</b></td>';
+			print '<td class="right nowraponall amount"><b>'.price($row[13],'', $langs, 1, 2, 2, $conf->currency).'</b></td>';
 			print '</tr>';
 		}
 		$db->free($resql);
@@ -686,9 +686,9 @@ if ($conf->global->MAIN_FEATURES_LEVEL > 0) { // This part of code looks strange
 			while ($row = $db->fetch_row($resql)) {
 				print '<tr><td>'.$row[0].'</td>';
 				for ($i = 1; $i <= 12; $i++) {
-					print '<td class="right nowraponall amount">'.price(price2num($row[$i])).'</td>';
+					print '<td class="right nowraponall amount">'.price(price2num($row[$i]),'', $langs, 1, 2, 2, $conf->currency).'</td>';
 				}
-				print '<td class="right nowraponall amount"><b>'.price(price2num($row[13])).'</b></td>';
+				print '<td class="right nowraponall amount"><b>'.price(price2num($row[13]),'', $langs, 1, 2, 2, $conf->currency).'</b></td>';
 				print '</tr>';
 			}
 			$db->free($resql);

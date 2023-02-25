@@ -1419,6 +1419,14 @@ class Product extends CommonObject
 				}
 			}
 
+			// Delete record into ECM index and physically
+			if (!$error) {
+				$res = $this->deleteEcmFiles(0); // Deleting files physically is done later with the dol_delete_dir_recursive
+				if (!$res) {
+					$error++;
+				}
+			}
+
 			if (!$error) {
 				// We remove directory
 				$ref = dol_sanitizeFileName($this->ref);
@@ -3491,7 +3499,7 @@ class Product extends CommonObject
 		global $db, $conf, $user, $hookmanager;
 
 		$sql = "SELECT COUNT(DISTINCT f.fk_soc) as nb_customers, COUNT(DISTINCT f.rowid) as nb,";
-		$sql .= " COUNT(fd.rowid) as nb_rows, SUM('fd.qty') as qty";
+		$sql .= " COUNT(fd.rowid) as nb_rows, SUM(fd.qty) as qty";
 		$sql .= " FROM ".MAIN_DB_PREFIX."facturedet_rec as fd";
 		$sql .= ", ".MAIN_DB_PREFIX."facture_rec as f";
 		$sql .= ", ".MAIN_DB_PREFIX."societe as s";
@@ -4812,7 +4820,7 @@ class Product extends CommonObject
 		$sql .= " AND pa.fk_product_fils <> ".((int) $id); // This should not happens, it is to avoid infinite loop if it happens
 		$sql.= " ORDER BY pa.rang";
 
-		dol_syslog(get_class($this).'::getChildsArbo id='.$id.' level='.$level. ' parents='.$parents, LOG_DEBUG);
+		dol_syslog(get_class($this).'::getChildsArbo id='.$id.' level='.$level. ' parents='.(is_array($parents)?implode(',', $parents):$parents), LOG_DEBUG);
 
 		if ($level == 1) {
 			$alreadyfound = array($id=>1); // We init array of found object to start of tree, so if we found it later (should not happened), we stop immediatly

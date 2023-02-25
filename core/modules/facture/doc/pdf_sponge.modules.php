@@ -1269,7 +1269,7 @@ class pdf_sponge extends ModelePDFFactures
 					require_once DOL_DOCUMENT_ROOT.'/core/lib/payments.lib.php';
 					global $langs;
 
-					$langs->loadLangs(array('payment', 'paybox'));
+					$langs->loadLangs(array('payment', 'paybox', 'stripe'));
 					$servicename = $langs->transnoentities('Online');
 					$paiement_url = getOnlinePaymentUrl('', 'invoice', $object->ref, '', '', '');
 					$linktopay = $langs->trans("ToOfferALinkForOnlinePayment", $servicename).' <a href="'.$paiement_url.'">'.$outputlangs->transnoentities("ClickHere").'</a>';
@@ -1514,7 +1514,7 @@ class pdf_sponge extends ModelePDFFactures
 		// Total remise
 		$total_line_remise = 0;
 		foreach ($object->lines as $i => $line) {
-			$total_line_remise += pdfGetLineTotalDiscountAmount($object, $i, $outputlangs, 2); // TODO: add this method to core/lib/pdf.lib
+			$total_line_remise += (float) pdfGetLineTotalDiscountAmount($object, $i, $outputlangs, 2); // TODO: add this method to core/lib/pdf.lib
 			// Gestion remise sous forme de ligne négative
 			if ($line->total_ht < 0) {
 				$total_line_remise += -$line->total_ht;

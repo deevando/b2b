@@ -15,7 +15,7 @@
  * Copyright (C) 2013       Cedric Gross            <c.gross@kreiz-it.fr>
  * Copyright (C) 2013       Florian Henry           <florian.henry@open-concept.pro>
  * Copyright (C) 2016-2022  Ferran Marcet           <fmarcet@2byte.es>
- * Copyright (C) 2018       Alexandre Spangaro		<aspangaro@open-dsi.fr>
+ * Copyright (C) 2018-2022  Alexandre Spangaro		<aspangaro@open-dsi.fr>
  * Copyright (C) 2018       Nicolas ZABOURI         <info@inovea-conseil.com>
  * Copyright (C) 2022       Sylvain Legrand         <contact@infras.fr>
  * Copyright (C) 2022      	Gauthier VERDOL       	<gauthier.verdol@atm-consulting.fr>
@@ -136,21 +136,32 @@ class Facture extends CommonInvoice
 	/**
 	 * @var int	Date expected for delivery
 	 * @deprecated
+	 * @see delivery_date
 	 */
-	public $date_livraison; // deprecated; Use delivery_date instead.
+	public $date_livraison;
 
+	/**
+	 * @var int	Date expected for delivery
+	 */
 	public $delivery_date; // Date expected of shipment (date starting shipment, not the reception that occurs some days after)
 
 	/**
 	 * @var string customer ref
+	 * @deprecated
+	 * @see ref_customer
 	 */
 	public $ref_client;
+
+	/**
+	 * @var string customer ref
+	 */
+	public $ref_customer;
 
 	/**
 	 * @var int Ref Int
 	 * @deprecated
 	 */
-	public $ref_int; // deprecated
+	public $ref_int;
 
 	//Check constants for types
 	public $type = self::TYPE_STANDARD;
@@ -335,8 +346,8 @@ class Facture extends CommonInvoice
 		'fk_currency' =>array('type'=>'varchar(3)', 'label'=>'CurrencyCode', 'enabled'=>1, 'visible'=>-1, 'position'=>185),
 		'fk_cond_reglement' =>array('type'=>'integer', 'label'=>'PaymentTerm', 'enabled'=>1, 'visible'=>-1, 'notnull'=>1, 'position'=>190),
 		'fk_mode_reglement' =>array('type'=>'integer', 'label'=>'PaymentMode', 'enabled'=>1, 'visible'=>-1, 'position'=>195),
-		'note_private' =>array('type'=>'text', 'label'=>'NotePublic', 'enabled'=>1, 'visible'=>0, 'position'=>205),
-		'note_public' =>array('type'=>'text', 'label'=>'NotePrivate', 'enabled'=>1, 'visible'=>0, 'position'=>210),
+		'note_private' =>array('type'=>'text', 'label'=>'NotePrivate', 'enabled'=>1, 'visible'=>0, 'position'=>205),
+		'note_public' =>array('type'=>'text', 'label'=>'NotePublic', 'enabled'=>1, 'visible'=>0, 'position'=>210),
 		'model_pdf' =>array('type'=>'varchar(255)', 'label'=>'Model pdf', 'enabled'=>1, 'visible'=>0, 'position'=>215),
 		'extraparams' =>array('type'=>'varchar(255)', 'label'=>'Extraparams', 'enabled'=>1, 'visible'=>-1, 'position'=>225),
 		'situation_cycle_ref' =>array('type'=>'smallint(6)', 'label'=>'Situation cycle ref', 'enabled'=>'$conf->global->INVOICE_USE_SITUATION', 'visible'=>-1, 'position'=>230),
@@ -871,7 +882,7 @@ class Facture extends CommonInvoice
 						);
 
 						// Defined the new fk_parent_line
-						if ($result > 0) {
+						if ($result > 0 && $newinvoiceline->product_type == 9) {
 							$fk_parent_line = $result;
 						}
 					}
@@ -1325,6 +1336,8 @@ class Facture extends CommonInvoice
 				$action = '';
 				$reshook = $hookmanager->executeHooks('createFrom', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
 				if ($reshook < 0) {
+					$this->errors += $hookmanager->errors;
+					$this->error = $hookmanager->error;
 					$error++;
 				}
 			}
@@ -1458,6 +1471,8 @@ class Facture extends CommonInvoice
 			$action = '';
 			$reshook = $hookmanager->executeHooks('createFrom', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
 			if ($reshook < 0) {
+				$this->errors += $hookmanager->errors;
+				$this->error = $hookmanager->error;
 				$error++;
 			}
 
@@ -1985,8 +2000,9 @@ class Facture extends CommonInvoice
 				$this->id = $obj->rowid;
 				$this->entity = $obj->entity;
 
-				$this->ref = $obj->ref;
-				$this->ref_client = $obj->ref_client;
+				$this->ref					= $obj->ref;
+				$this->ref_client			= $obj->ref_client;
+				$this->ref_customer			= $obj->ref_client;
 				$this->ref_ext				= $obj->ref_ext;
 				$this->type					= $obj->type;
 				$this->date					= $this->db->jdate($obj->df);
@@ -3621,7 +3637,7 @@ class Facture extends CommonInvoice
 
 		global $mysoc, $conf, $langs;
 
-		dol_syslog(get_class($this)."::addline id=$this->id,desc=$desc,pu_ht=$pu_ht,qty=$qty,txtva=$txtva, txlocaltax1=$txlocaltax1, txlocaltax2=$txlocaltax2, fk_product=$fk_product,remise_percent=$remise_percent,date_start=$date_start,date_end=$date_end,ventil=$ventil,info_bits=$info_bits,fk_remise_except=$fk_remise_except,price_base_type=$price_base_type,pu_ttc=$pu_ttc,type=$type, fk_unit=$fk_unit", LOG_DEBUG);
+		dol_syslog(get_class($this)."::addline id=$this->id, pu_ht=$pu_ht, qty=$qty, txtva=$txtva, txlocaltax1=$txlocaltax1, txlocaltax2=$txlocaltax2, fk_product=$fk_product, remise_percent=$remise_percent, date_start=$date_start, date_end=$date_end, ventil=$ventil, info_bits=$info_bits, fk_remise_except=$fk_remise_except, price_base_type=$price_base_type, pu_ttc=$pu_ttc, type=$type, fk_unit=$fk_unit, desc=".dol_trunc($desc, 25), LOG_DEBUG);
 
 		if ($this->statut == self::STATUS_DRAFT) {
 			include_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
@@ -5303,7 +5319,7 @@ class Facture extends CommonInvoice
 
 	/**
 	 * @param	int			$rounding		Minimum number of decimal to show. If 0, no change, if -1, we use min($conf->global->MAIN_MAX_DECIMALS_UNIT,$conf->global->MAIN_MAX_DECIMALS_TOT)
-	 * @return number or -1 if not available
+	 * @return float or -1 if not available
 	 */
 	public function getRetainedWarrantyAmount($rounding = -1)
 	{
@@ -5916,9 +5932,6 @@ class FactureLigne extends CommonInvoiceLine
 		if (empty($this->remise_percent)) {
 			$this->remise_percent = 0;
 		}
-		if (empty($this->remise)) {
-			$this->remise = 0;
-		}
 		if (empty($this->info_bits)) {
 			$this->info_bits = 0;
 		}
@@ -6152,9 +6165,6 @@ class FactureLigne extends CommonInvoiceLine
 		}
 		if (empty($this->remise_percent)) {
 			$this->remise_percent = 0;
-		}
-		if (empty($this->remise)) {
-			$this->remise = 0;
 		}
 		if (empty($this->info_bits)) {
 			$this->info_bits = 0;

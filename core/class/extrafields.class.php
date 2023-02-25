@@ -10,6 +10,7 @@
  * Copyright (C) 2016       Raphaël Doursenaud      <rdoursenaud@gpcsolutions.fr>
  * Copyright (C) 2017       Nicolas ZABOURI         <info@inovea-conseil.com>
  * Copyright (C) 2018-2021  Frédéric France         <frederic.france@netlogic.fr>
+ * Copyright (C) 2022 		Antonin MARCHAL         <antonin@letempledujeu.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1456,15 +1457,15 @@ class ExtraFields
 							$labeltoshow = dol_trunc($labeltoshow, 45);
 
 							if (is_array($value_arr) && in_array($obj->rowid, $value_arr)) {
+								$labeltoshow = '';
 								foreach ($fields_label as $field_toshow) {
 									$translabel = $langs->trans($obj->$field_toshow);
 									if ($translabel != $obj->$field_toshow) {
-										$labeltoshow = dol_trunc($translabel, 18).' ';
+										$labeltoshow .= ' '.dol_trunc($translabel, 18).' ';
 									} else {
-										$labeltoshow = dol_trunc($obj->$field_toshow, 18).' ';
+										$labeltoshow .= ' '.dol_trunc($obj->$field_toshow, 18).' ';
 									}
 								}
-
 								$data[$obj->rowid] = $labeltoshow;
 							} else {
 								if (!$notrans) {
@@ -1709,7 +1710,12 @@ class ExtraFields
 				dol_syslog(get_class($this).'::showOutputField error '.$this->db->lasterror(), LOG_WARNING);
 			}
 		} elseif ($type == 'radio') {
-			$value = $langs->trans($param['options'][$value]);
+			if (!isset($param['options'][$value])) {
+				$langs->load('errors');
+				$value = $langs->trans('ErrorNoValueForRadioType');
+			} else {
+				$value = $langs->trans($param['options'][$value]);
+			}
 		} elseif ($type == 'checkbox') {
 			$value_arr = explode(',', $value);
 			$value = '';
@@ -1768,17 +1774,20 @@ class ExtraFields
 						$fields_label = explode('|', $InfoFieldList[1]);
 						if (is_array($value_arr) && in_array($obj->rowid, $value_arr)) {
 							if (is_array($fields_label) && count($fields_label) > 1) {
+								$label = '<li class="select2-search-choice-dolibarr noborderoncategories" style="background: #bbb">';
 								foreach ($fields_label as $field_toshow) {
 									$translabel = '';
 									if (!empty($obj->$field_toshow)) {
 										$translabel = $langs->trans($obj->$field_toshow);
 									}
 									if ($translabel != $field_toshow) {
-										$toprint[] = '<li class="select2-search-choice-dolibarr noborderoncategories" style="background: #bbb">'.dol_trunc($translabel, 18).'</li>';
+										$label .= ' '.dol_trunc($translabel, 18);
 									} else {
-										$toprint[] = '<li class="select2-search-choice-dolibarr noborderoncategories" style="background: #bbb">'.$obj->$field_toshow.'</li>';
+										$label .= ' '.$obj->$field_toshow;
 									}
 								}
+								$label .= '</li>';
+								$toprint[] = $label;
 							} else {
 								$translabel = '';
 								if (!empty($obj->{$InfoFieldList[1]})) {
@@ -2034,14 +2043,21 @@ class ExtraFields
 
 				$visibility = 1;
 				if (isset($this->attributes[$object->table_element]['list'][$key])) {		// 'list' is option for visibility
-					$visibility = dol_eval($this->attributes[$object->table_element]['list'][$key], 1, 1, '1');
+					$visibility = intval(dol_eval($this->attributes[$object->table_element]['list'][$key], 1, 1, '1'));
 				}
 
 				$perms = 1;
 				if (isset($this->attributes[$object->table_element]['perms'][$key])) {
 					$perms = dol_eval($this->attributes[$object->table_element]['perms'][$key], 1, 1, '1');
 				}
-				if (empty($enabled)) {
+				if (empty($enabled)
+					|| (
+						$onlykey === '@GETPOSTISSET'
+						&& in_array($this->attributes[$object->table_element]['type'][$key], array('boolean', 'chkbxlst'))
+						&& in_array(abs($enabled), array(2, 5))
+						&& ! GETPOSTISSET('options_' . $key) // Update hidden checkboxes and multiselect only if they are provided
+					)
+				) {
 					continue;
 				}
 				if (empty($visibility)) {
@@ -2167,9 +2183,12 @@ class ExtraFields
 					$dateparamname_end   = $keysuffix . 'options_' . $key . $keyprefix . '_end';
 					if (GETPOSTISSET($dateparamname_start . 'year') && GETPOSTISSET($dateparamname_end . 'year')) {
 						// values provided as a date pair (start date + end date), each date being broken down as year, month, day, etc.
+						$dateparamname_end_hour = GETPOST($dateparamname_end . 'hour', 'int') !='-1' ? GETPOST($dateparamname_end . 'hour', 'int') : '23';
+						$dateparamname_end_min = GETPOST($dateparamname_end . 'min', 'int') !='-1' ? GETPOST($dateparamname_end . 'min', 'int') : '59';
+						$dateparamname_end_sec = GETPOST($dateparamname_end . 'sec', 'int') !='-1' ? GETPOST($dateparamname_end . 'sec', 'int') : '59';
 						$value_key = array(
 							'start' => dol_mktime(GETPOST($dateparamname_start . 'hour', 'int'), GETPOST($dateparamname_start . 'min', 'int'), GETPOST($dateparamname_start . 'sec', 'int'), GETPOST($dateparamname_start . 'month', 'int'), GETPOST($dateparamname_start . 'day', 'int'), GETPOST($dateparamname_start . 'year', 'int'), 'tzuserrel'),
-							'end' => dol_mktime(GETPOST($dateparamname_end . 'hour', 'int'), GETPOST($dateparamname_start . 'min', 'int'), GETPOST($dateparamname_start . 'sec', 'int'), GETPOST($dateparamname_end . 'month', 'int'), GETPOST($dateparamname_end . 'day', 'int'), GETPOST($dateparamname_end . 'year', 'int'), 'tzuserrel')
+							'end' => dol_mktime($dateparamname_end_hour, $dateparamname_end_min, $dateparamname_end_sec, GETPOST($dateparamname_end . 'month', 'int'), GETPOST($dateparamname_end . 'day', 'int'), GETPOST($dateparamname_end . 'year', 'int'), 'tzuserrel')
 						);
 					} elseif (GETPOSTISSET($keysuffix."options_".$key.$keyprefix."year")) {
 						// Clean parameters

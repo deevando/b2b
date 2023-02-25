@@ -794,6 +794,9 @@ class Societe extends CommonObject
 	public $partnerships = array();
 
 
+	const STATUS_CEASED = 0;
+	const STATUS_INACTIVITY = 1;
+
 
 	/**
 	 * @var Account|string Default BAN account
@@ -1479,7 +1482,7 @@ class Societe extends CommonObject
 
 			$sql .= ",fk_effectif = ".($this->effectif_id > 0 ? ((int) $this->effectif_id) : "null");
 			if (isset($this->stcomm_id)) {
-				$sql .= ",fk_stcomm=".($this->stcomm_id > 0 ? ((int) $this->stcomm_id) : "0");
+				$sql .= ",fk_stcomm=".(int) $this->stcomm_id;
 			}
 			if (isset($this->typent_id)) {
 				$sql .= ",fk_typent = ".($this->typent_id > 0 ? ((int) $this->typent_id) : "0");
@@ -2683,23 +2686,24 @@ class Societe extends CommonObject
 		if (!empty($this->tva_intra) || (!empty($conf->global->SOCIETE_SHOW_FIELD_IN_TOOLTIP) && strpos($conf->global->SOCIETE_SHOW_FIELD_IN_TOOLTIP, 'vatnumber') !== false)) {
 			$label2 .= '<br><b>'.$langs->trans('VATIntra').':</b> '.dol_escape_htmltag($this->tva_intra);
 		}
+
 		if (!empty($conf->global->SOCIETE_SHOW_FIELD_IN_TOOLTIP)) {
-			if (strpos($conf->global->SOCIETE_SHOW_FIELD_IN_TOOLTIP, 'profid1') !== false) {
+			if (strpos($conf->global->SOCIETE_SHOW_FIELD_IN_TOOLTIP, 'profid1') !== false && $langs->trans('ProfId1'.$this->country_code) != '-') {
 				$label2 .= '<br><b>'.$langs->trans('ProfId1'.$this->country_code).':</b> '.$this->idprof1;
 			}
-			if (strpos($conf->global->SOCIETE_SHOW_FIELD_IN_TOOLTIP, 'profid2') !== false) {
+			if (strpos($conf->global->SOCIETE_SHOW_FIELD_IN_TOOLTIP, 'profid2') !== false && $langs->trans('ProfId2'.$this->country_code) != '-') {
 				$label2 .= '<br><b>'.$langs->trans('ProfId2'.$this->country_code).':</b> '.$this->idprof2;
 			}
-			if (strpos($conf->global->SOCIETE_SHOW_FIELD_IN_TOOLTIP, 'profid3') !== false) {
+			if (strpos($conf->global->SOCIETE_SHOW_FIELD_IN_TOOLTIP, 'profid3') !== false && $langs->trans('ProfId3'.$this->country_code) != '-') {
 				$label2 .= '<br><b>'.$langs->trans('ProfId3'.$this->country_code).':</b> '.$this->idprof3;
 			}
-			if (strpos($conf->global->SOCIETE_SHOW_FIELD_IN_TOOLTIP, 'profid4') !== false) {
+			if (strpos($conf->global->SOCIETE_SHOW_FIELD_IN_TOOLTIP, 'profid4') !== false && $langs->trans('ProfId4'.$this->country_code) != '-') {
 				$label2 .= '<br><b>'.$langs->trans('ProfId4'.$this->country_code).':</b> '.$this->idprof4;
 			}
-			if (strpos($conf->global->SOCIETE_SHOW_FIELD_IN_TOOLTIP, 'profid5') !== false) {
+			if (strpos($conf->global->SOCIETE_SHOW_FIELD_IN_TOOLTIP, 'profid5') !== false && $langs->trans('ProfId5'.$this->country_code) != '-') {
 				$label2 .= '<br><b>'.$langs->trans('ProfId5'.$this->country_code).':</b> '.$this->idprof5;
 			}
-			if (strpos($conf->global->SOCIETE_SHOW_FIELD_IN_TOOLTIP, 'profid6') !== false) {
+			if (strpos($conf->global->SOCIETE_SHOW_FIELD_IN_TOOLTIP, 'profid6') !== false && $langs->trans('ProfId6'.$this->country_code) != '-') {
 				$label2 .= '<br><b>'.$langs->trans('ProfId6'.$this->country_code).':</b> '.$this->idprof6;
 			}
 		}

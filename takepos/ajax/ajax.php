@@ -234,7 +234,7 @@ if ($action == 'getProducts') {
 	$sql .= ' FROM '.MAIN_DB_PREFIX.'product as p';
 	if (getDolGlobalInt('TAKEPOS_PRODUCT_IN_STOCK') == 1) {
 		$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'product_stock as ps';
-		$sql .= ' ON p.rowid = ps.fk_product';
+		$sql .= ' ON (p.rowid = ps.fk_product';
 		$sql .= " AND ps.fk_entrepot = ".((int) getDolGlobalInt("CASHDESK_ID_WAREHOUSE".$_SESSION['takeposterminal']));
 	}
 

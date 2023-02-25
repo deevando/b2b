@@ -452,7 +452,7 @@ if (!empty($arrayfields['t.tobill']['checked']) || !empty($arrayfields['t.billed
 	$sql .= " s.nom, s.rowid,";
 	$sql .= " t.datec, t.dateo, t.datee, t.tms,";
 	$sql .= " t.rowid, t.ref, t.label, t.planned_workload, t.duration_effective, t.progress,t.budget_amount, t.fk_statut";
-	if ($search_categ) {
+	if ($search_categ > 0) {
 		$sql .= ", cs.fk_categorie, cs.fk_project";
 	}
 	// Add fields from extrafields
@@ -1052,7 +1052,7 @@ while ($i < $imaxinloop) {
 			// Description
 			if (!empty($arrayfields['t.description']['checked'])) {
 				print '<td>';
-				print dol_escape_htmltag($object->description);
+				print dolGetFirstLineOfText($object->description, 5);
 				print '</td>';
 				if (!$i) {
 					$totalarray['nbfield']++;

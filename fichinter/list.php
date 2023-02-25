@@ -496,7 +496,7 @@ $selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfi
 $selectedfields .= (count($arrayofmassactions) ? $form->showCheckAddButtons('checkforselect', 1) : '');
 
 print '<div class="div-table-responsive">';
-print '<table class="tagtable nobottomiftotal liste'.($moreforfilter ? " listwithfilterbefore" : "").'">'."\n";
+print '<table class="tagtable liste'.($moreforfilter ? " listwithfilterbefore" : "").'">'."\n";
 
 // Fields title search
 // --------------------------------------------------------------------
@@ -801,7 +801,7 @@ while ($i < $imaxinloop) {
 	// Note public
 	if (!empty($arrayfields['f.note_public']['checked'])) {
 		print '<td class="center">';
-		print dol_escape_htmltag($obj->note_public);
+		print dol_string_nohtmltag($obj->note_public);
 		print '</td>';
 		if (!$i) {
 			$totalarray['nbfield']++;
@@ -810,7 +810,7 @@ while ($i < $imaxinloop) {
 	// Note private
 	if (!empty($arrayfields['f.note_private']['checked'])) {
 		print '<td class="center">';
-		print dol_escape_htmltag($obj->note_private);
+		print dol_string_nohtmltag($obj->note_private);
 		print '</td>';
 		if (!$i) {
 			$totalarray['nbfield']++;
@@ -843,6 +843,9 @@ while ($i < $imaxinloop) {
 		}
 		if (!$i) {
 			$totalarray['type'][$totalarray['nbfield']] = 'duration';
+		}
+		if (!$i) {
+			$totalarray['pos'][$totalarray['nbfield']] = 'fd.duree';
 		}
 		$totalarray['val']['fd.duree'] += $obj->duree;
 	}

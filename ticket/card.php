@@ -56,7 +56,7 @@ $ref       = GETPOST('ref', 'alpha');
 $projectid = GETPOST('projectid', 'int');
 $cancel    = GETPOST('cancel', 'alpha');
 $action    = GETPOST('action', 'aZ09');
-$backtopage = GETPOST('$backtopage', 'alpha');
+$backtopage = GETPOST('backtopage', 'alpha');
 $contactid = GETPOST('contactid', 'int');
 
 $notifyTiers = GETPOST("notify_tiers_at_create", 'alpha');
@@ -726,7 +726,7 @@ if ($action == 'create' || $action == 'presend') {
 
 	$formticket->withcancel = 1;
 
-	$formticket->showForm(1, 'create', 0);
+	$formticket->showForm(1, 'create', 0, null, $action);
 	/*} elseif ($action == 'edit' && $user->rights->ticket->write && $object->status < Ticket::STATUS_CLOSED) {
 	$formticket = new FormTicket($db);
 
@@ -1508,6 +1508,8 @@ if ($action == 'create' || $action == 'presend') {
 
 			$formticket->withsubstit = 1;
 			$formticket->substit = $substitutionarray;
+			$formticket->backtopage = $backtopage;
+
 			$formticket->showMessageForm('100%');
 			print '</div>';
 		}

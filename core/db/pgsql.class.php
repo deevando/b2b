@@ -726,10 +726,22 @@ class DoliDBPgsql extends DoliDB
 	 *
 	 *	@param	string	$stringtoencode		String to escape
 	 *	@return	string						String escaped
+	 *  @deprecated
 	 */
 	public function escapeunderscore($stringtoencode)
 	{
-		return str_replace('_', '\_', $stringtoencode);
+		return str_replace('_', '\_', (string) $stringtoencode);
+	}
+
+	/**
+	 *	Escape a string to insert data into a like
+	 *
+	 *	@param	string	$stringtoencode		String to escape
+	 *	@return	string						String escaped
+	 */
+	public function escapeforlike($stringtoencode)
+	{
+		return str_replace(array('_', '\\', '%'), array('\_', '\\\\', '\%'), (string) $stringtoencode);
 	}
 
 	/**
@@ -1208,7 +1220,7 @@ class DoliDBPgsql extends DoliDB
 		// phpcs:enable
 		$sql = "ALTER TABLE ".$table;
 		$sql .= " MODIFY COLUMN ".$field_name." ".$field_desc['type'];
-		if (in_array($field_desc['type'], array('double', 'tinyint', 'int', 'varchar')) && $field_desc['value']) {
+		if (in_array($field_desc['type'], array('double', 'varchar')) && $field_desc['value']) {
 			$sql .= "(".$field_desc['value'].")";
 		}
 

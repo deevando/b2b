@@ -18,6 +18,7 @@
  * Copyright (C) 2020       Open-Dsi         			<support@open-dsi.fr>
  * Copyright (C) 2021       Gauthier VERDOL         	<gauthier.verdol@atm-consulting.fr>
  * Copyright (C) 2022       Anthony Berton	         	<anthony.berton@bb2a.fr>
+ * Copyright (C) 2022       Ferran Marcet           	<fmarcet@2byte.es>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1156,7 +1157,17 @@ function dol_buildpath($path, $type = 0, $returnemptyifnotfound = 0)
 function dol_clone($object, $native = 0)
 {
 	if (empty($native)) {
+		$tmpsavdb = null;
+		if (isset($object->db) && isset($object->db->db) && is_object($object->db->db) && get_class($object->db->db) == 'PgSql\Connection') {
+			$tmpsavdb = $object->db;
+			unset($object->db);		// Such property can not be serialized when PgSql/Connection
+		}
+
 		$myclone = unserialize(serialize($object));	// serialize then unserialize is hack to be sure to have a new object for all fields
+
+		if ($tmpsavdb) {
+			$object->db = $tmpsavdb;
+		}
 	} else {
 		$myclone = clone $object; // PHP clone is a shallow copy only, not a real clone, so properties of references will keep the reference (refering to the same target/variable)
 	}
@@ -1448,9 +1459,9 @@ function dol_escape_htmltag($stringtoescape, $keepb = 0, $keepn = 0, $noescapeta
 
 	// escape quotes and backslashes, newlines, etc.
 	if ($escapeonlyhtmltags) {
-		$tmp = htmlspecialchars_decode($stringtoescape, ENT_COMPAT);
+		$tmp = htmlspecialchars_decode((string) $stringtoescape, ENT_COMPAT);
 	} else {
-		$tmp = html_entity_decode($stringtoescape, ENT_COMPAT, 'UTF-8');
+		$tmp = html_entity_decode((string) $stringtoescape, ENT_COMPAT, 'UTF-8');
 	}
 	if (!$keepb) {
 		$tmp = strtr($tmp, array("<b>"=>'', '</b>'=>''));
@@ -3948,7 +3959,8 @@ function img_picto($titlealt, $picto, $moreatt = '', $pictoisfullpath = false, $
 				'shapes', 'square', 'stop-circle', 'supplier', 'supplier_proposal', 'supplier_order', 'supplier_invoice',
 				'timespent', 'title_setup', 'title_accountancy', 'title_bank', 'title_hrm', 'title_agenda',
 				'uncheck', 'user-cog', 'user-injured', 'user-md', 'vat', 'website', 'workstation', 'webhook', 'world', 'private',
-				'conferenceorbooth', 'eventorganization'
+				'conferenceorbooth', 'eventorganization',
+				'stamp', 'signature'
 			))) {
 			$fakey = $pictowithouttext;
 			$facolor = '';
@@ -4052,7 +4064,7 @@ function img_picto($titlealt, $picto, $moreatt = '', $pictoisfullpath = false, $
 			// Add CSS
 			$arrayconvpictotomorcess = array(
 				'action'=>'infobox-action', 'account'=>'infobox-bank_account', 'accounting_account'=>'infobox-bank_account', 'accountline'=>'infobox-bank_account', 'accountancy'=>'infobox-bank_account', 'asset'=>'infobox-bank_account',
-				'bank_account'=>'bg-infobox-bank_account',
+				'bank_account'=>'infobox-bank_account',
 				'bill'=>'infobox-commande', 'billa'=>'infobox-commande', 'billr'=>'infobox-commande', 'billd'=>'infobox-commande',
 				'margin'=>'infobox-bank_account', 'conferenceorbooth'=>'infobox-project',
 				'cash-register'=>'infobox-bank_account', 'contract'=>'infobox-contrat', 'check'=>'font-status4', 'collab'=>'infobox-action', 'conversation'=>'infobox-contrat',
@@ -6321,7 +6333,7 @@ function get_default_tva(Societe $thirdparty_seller, Societe $thirdparty_buyer, 
 
 	// Si le (pays vendeur = pays acheteur) alors la TVA par defaut=TVA du produit vendu. Fin de regle.
 	if (($seller_country_code == $buyer_country_code)
-	|| (in_array($seller_country_code, array('FR,MC')) && in_array($buyer_country_code, array('FR', 'MC')))) { // Warning ->country_code not always defined
+	|| (in_array($seller_country_code, array('FR', 'MC')) && in_array($buyer_country_code, array('FR', 'MC')))) { // Warning ->country_code not always defined
 		//print 'VATRULE 2';
 		return get_product_vat_for_country($idprod, $thirdparty_seller, $idprodfournprice);
 	}
@@ -7405,7 +7417,11 @@ function getCommonSubstitutionArray($outputlangs, $onlykey = 0, $exclude = null,
 			$substitutionarray['__REF_SUPPLIER__'] = (isset($object->ref_supplier) ? $object->ref_supplier : null);
 			$substitutionarray['__NOTE_PUBLIC__'] = (isset($object->note_public) ? $object->note_public : null);
 			$substitutionarray['__NOTE_PRIVATE__'] = (isset($object->note_private) ? $object->note_private : null);
-			$substitutionarray['__DATE_DELIVERY__'] = (isset($object->date_livraison) ? dol_print_date($object->date_livraison, 'day', 0, $outputlangs) : '');
+			if ($object->element == "shipping") {
+				$substitutionarray['__DATE_DELIVERY__'] = (isset($object->date_delivery) ? dol_print_date($object->date_delivery, 'day', 0, $outputlangs) : '');
+			} else {
+				$substitutionarray['__DATE_DELIVERY__'] = (isset($object->date_livraison) ? dol_print_date($object->date_livraison, 'day', 0, $outputlangs) : '');
+			}
 			$substitutionarray['__DATE_DELIVERY_DAY__'] = (isset($object->date_livraison) ? dol_print_date($object->date_livraison, "%d") : '');
 			$substitutionarray['__DATE_DELIVERY_DAY_TEXT__'] = (isset($object->date_livraison) ? dol_print_date($object->date_livraison, "%A") : '');
 			$substitutionarray['__DATE_DELIVERY_MON__'] = (isset($object->date_livraison) ? dol_print_date($object->date_livraison, "%m") : '');
@@ -7519,6 +7535,9 @@ function getCommonSubstitutionArray($outputlangs, $onlykey = 0, $exclude = null,
 				$substitutionarray['__PROJECT_ID__'] = (is_object($object->projet) ? $object->projet->id : '');
 				$substitutionarray['__PROJECT_REF__'] = (is_object($object->projet) ? $object->projet->ref : '');
 				$substitutionarray['__PROJECT_NAME__'] = (is_object($object->projet) ? $object->projet->title : '');
+			}
+			if (is_object($object) && $object->element == 'project') {
+				$substitutionarray['__PROJECT_NAME__'] = $object->title;
 			}
 
 			if (is_object($object) && $object->element == 'shipping') {
@@ -7704,7 +7723,7 @@ function getCommonSubstitutionArray($outputlangs, $onlykey = 0, $exclude = null,
 		$substitutionarray['__AMOUNT_TEXT__']     = is_object($object) ? dol_convertToWord($object->total_ttc, $outputlangs, '', true) : '';
 		$substitutionarray['__AMOUNT_TEXTCURRENCY__'] = is_object($object) ? dol_convertToWord($object->total_ttc, $outputlangs, $conf->currency, true) : '';
 
-		$substitutionarray['__AMOUNT_REMAIN__'] = is_object($object) ? $object->total_ttc - $already_payed_all : '';
+		$substitutionarray['__AMOUNT_REMAIN__'] = is_object($object) ? price2num($object->total_ttc - $already_payed_all, 'MT') : '';
 
 		$substitutionarray['__AMOUNT_VAT__']      = is_object($object) ? (isset($object->total_vat) ? $object->total_vat : $object->total_tva) : '';
 		$substitutionarray['__AMOUNT_VAT_TEXT__']      = is_object($object) ? (isset($object->total_vat) ? dol_convertToWord($object->total_vat, $outputlangs, '', true) : dol_convertToWord($object->total_tva, $outputlangs, '', true)) : '';
@@ -8495,10 +8514,11 @@ function dol_osencode($str)
  * 		@param	string	$fieldkey		Field to search the key into
  * 		@param	string	$fieldid		Field to get
  *      @param  int		$entityfilter	Filter by entity
+ *      @param	string	$filters		Filters to add. WARNING: string must be escaped for SQL and not coming from user input.
  *      @return int						<0 if KO, Id of code if OK
  *      @see $langs->getLabelFromKey
  */
-function dol_getIdFromCode($db, $key, $tablename, $fieldkey = 'code', $fieldid = 'id', $entityfilter = 0)
+function dol_getIdFromCode($db, $key, $tablename, $fieldkey = 'code', $fieldid = 'id', $entityfilter = 0, $filters = '')
 {
 	global $cache_codes;
 
@@ -8519,6 +8539,9 @@ function dol_getIdFromCode($db, $key, $tablename, $fieldkey = 'code', $fieldid =
 	$sql .= " WHERE ".$fieldkey." = '".$db->escape($key)."'";
 	if (!empty($entityfilter)) {
 		$sql .= " AND entity IN (".getEntity($tablename).")";
+	}
+	if ($filters) {
+		$sql .= $filters;
 	}
 
 	$resql = $db->query($sql);
@@ -8600,7 +8623,7 @@ function dol_eval($s, $returnvalue = 0, $hideerrors = 1, $onlysimplestring = '1'
 		}
 	} elseif ($onlysimplestring == '2') {
 		// We must accept: (($reloadedobj = new Task($db)) && ($reloadedobj->fetchNoCompute($object->id) > 0) && ($secondloadedobj = new Project($db)) && ($secondloadedobj->fetchNoCompute($reloadedobj->fk_project) > 0)) ? $secondloadedobj->ref : "Parent project not found"
-		if (preg_match('/[^a-z0-9\s'.preg_quote('^$_+-.*>&|=!?():"\',/;[]', '/').']/i', $s)) {
+		if (preg_match('/[^a-z0-9\s'.preg_quote('^$_+-.*>&|=!?():"\',/@;[]', '/').']/i', $s)) {
 			if ($returnvalue) {
 				return 'Bad string syntax to evaluate (found chars that are not chars for simplestring): '.$s;
 			} else {
@@ -8638,7 +8661,7 @@ function dol_eval($s, $returnvalue = 0, $hideerrors = 1, $onlysimplestring = '1'
 	$forbiddenphpstrings = array('$$');
 	$forbiddenphpstrings = array_merge($forbiddenphpstrings, array('_ENV', '_SESSION', '_COOKIE', '_GET', '_POST', '_REQUEST'));
 
-	$forbiddenphpfunctions = array("exec", "passthru", "shell_exec", "system", "proc_open", "popen", "eval", "dol_eval", "executeCLI", 'verifCond');
+	$forbiddenphpfunctions = array("exec", "passthru", "shell_exec", "system", "proc_open", "popen", "eval", "dol_eval", "executeCLI", "verifCond", "base64_decode");
 	$forbiddenphpfunctions = array_merge($forbiddenphpfunctions, array("fopen", "file_put_contents", "fputs", "fputscsv", "fwrite", "fpassthru", "require", "include", "mkdir", "rmdir", "symlink", "touch", "unlink", "umask"));
 	$forbiddenphpfunctions = array_merge($forbiddenphpfunctions, array("function", "call_user_func"));
 

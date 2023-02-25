@@ -475,7 +475,7 @@ if (empty($reshook)) {
 				}
 			}
 
-			$trackid = 'emailingtest';
+			$trackid = 'emailing-test';
 			$mailfile = new CMailFile($tmpsujet, $object->sendto, $object->email_from, $tmpbody, $arr_file, $arr_mime, $arr_name, '', '', 0, $msgishtml, $object->email_errorsto, $arr_css, $trackid, '', 'emailing');
 
 			$result = $mailfile->sendfile();
@@ -518,9 +518,10 @@ if (empty($reshook)) {
 				exit;
 			}
 			$mesgs[] = $object->error;
+			$mesgs = array_merge($mesgs, $object->errors);
 		}
 
-		setEventMessages(null, $mesgs, 'errors');
+		setEventMessages('', $mesgs, 'errors');
 		$action = "create";
 	}
 
@@ -605,9 +606,10 @@ if (empty($reshook)) {
 					exit;
 				}
 				$mesgs[] = $object->error;
+				$mesgs = array_merge($mesgs, $object->errors);
 			}
 
-			setEventMessages($mesg, $mesgs, 'errors');
+			setEventMessages('', $mesgs, 'errors');
 			$action = "edit";
 		} else {
 			$action = "edit";

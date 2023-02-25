@@ -1034,6 +1034,19 @@ class Ticket extends CommonObject
 			}
 		}
 
+		// Delete all child tables
+
+		if (!$error) {
+			$sql = "DELETE FROM ".MAIN_DB_PREFIX."categorie_ticket";
+			$sql .= " WHERE fk_ticket = ".(int) $this->id;
+
+			$result = $this->db->query($sql);
+			if (!$result) {
+				$error++;
+				$this->errors[] = $this->db->lasterror();
+			}
+		}
+
 		if (!$error) {
 			$sql = "DELETE FROM ".MAIN_DB_PREFIX."ticket";
 			$sql .= " WHERE rowid=".((int) $this->id);
@@ -1588,7 +1601,7 @@ class Ticket extends CommonObject
 					$url_internal_ticket = dol_buildpath('/ticket/card.php', 2).'?track_id='.$this->track_id;
 					$message .= "\n".$langs->transnoentities('TicketNotificationEmailBodyInfosTrackUrlinternal').' : <a href="'.$url_internal_ticket.'">'.$this->track_id.'</a>'."\n";
 				} else {
-					$url_public_ticket = ($conf->global->TICKET_URL_PUBLIC_INTERFACE ? $conf->global->TICKET_URL_PUBLIC_INTERFACE.'/' : dol_buildpath('/public/ticket/view.php', 2)).'?track_id='.$this->track_id;
+					$url_public_ticket = ($conf->global->TICKET_URL_PUBLIC_INTERFACE ? $conf->global->TICKET_URL_PUBLIC_INTERFACE.'/view.php' : dol_buildpath('/public/ticket/view.php', 2)).'?track_id='.$this->track_id;
 					$message .= "\n".$langs->transnoentities('TicketNewEmailBodyInfosTrackUrlCustomer').' : <a href="'.$url_public_ticket.'">'.$this->track_id.'</a>'."\n";
 				}
 
@@ -2743,8 +2756,8 @@ class Ticket extends CommonObject
 									$result = $this->sendTicketMessageByEmail($subject, $message, '', $sendto, $listofpaths, $listofmimes, $listofnames);
 									if ($result) {
 										// update last_msg_sent date
-										$object->date_last_msg_sent = dol_now();
-										$object->update($user);
+										$this->date_last_msg_sent = dol_now();
+										$this->update($user);
 									}
 								}
 							}
@@ -2753,7 +2766,7 @@ class Ticket extends CommonObject
 				}
 
 				// Set status to "answered" if not set yet, but only if internal user
-				if ($object->fk_statut < 3 && !$user->socid) {
+				if ($object->status < 3 && !$user->socid) {
 					$object->setStatut(3);
 				}
 				return 1;

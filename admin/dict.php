@@ -1965,7 +1965,7 @@ if ($id > 0) {
 									$valuetoshow = ($key != "Country".strtoupper($obj->country_code) ? $obj->country_code." - ".$key : $obj->country);
 								}
 							} elseif ($value == 'recuperableonly' || $value == 'deductible' || $value == 'category_type') {
-								$valuetoshow = yn($valuetoshow);
+								$valuetoshow = yn($valuetoshow ? 1 : 0);
 								$class = "center";
 							} elseif ($value == 'type_cdr') {
 								if (empty($valuetoshow)) {
@@ -2086,7 +2086,7 @@ if ($id > 0) {
 							} elseif ($value == 'fk_tva') {
 								foreach ($form->cache_vatrates as $key => $Tab) {
 									if ($form->cache_vatrates[$key]['rowid'] == $valuetoshow) {
-										$valuetoshow = $form->cache_vatrates[$key]['libtva'];
+										$valuetoshow = $form->cache_vatrates[$key]['label'];
 										break;
 									}
 								}

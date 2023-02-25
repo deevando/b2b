@@ -237,8 +237,8 @@ class Contrat extends CommonObject
 		'fk_commercial_signature' =>array('type'=>'integer:User:user/class/user.class.php', 'label'=>'SaleRepresentative Signature', 'enabled'=>1, 'visible'=>-1, 'position'=>80),
 		'fk_commercial_suivi' =>array('type'=>'integer:User:user/class/user.class.php', 'label'=>'SaleRepresentative follower', 'enabled'=>1, 'visible'=>-1, 'position'=>85),
 		'fk_user_author' =>array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>1, 'visible'=>-1, 'notnull'=>1, 'position'=>90),
-		'note_private' =>array('type'=>'text', 'label'=>'NotePublic', 'enabled'=>1, 'visible'=>0, 'position'=>105),
-		'note_public' =>array('type'=>'text', 'label'=>'NotePrivate', 'enabled'=>1, 'visible'=>0, 'position'=>110),
+		'note_public' =>array('type'=>'text', 'label'=>'NotePublic', 'enabled'=>1, 'visible'=>0, 'position'=>105),
+		'note_private' =>array('type'=>'text', 'label'=>'NotePrivate', 'enabled'=>1, 'visible'=>0, 'position'=>110),
 		'model_pdf' =>array('type'=>'varchar(255)', 'label'=>'Model pdf', 'enabled'=>1, 'visible'=>0, 'position'=>115),
 		'import_key' =>array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>1, 'visible'=>-2, 'position'=>120),
 		'extraparams' =>array('type'=>'varchar(255)', 'label'=>'Extraparams', 'enabled'=>1, 'visible'=>-1, 'position'=>125),
@@ -1703,8 +1703,8 @@ class Contrat extends CommonObject
 		$total_localtax1 = $tabprice[9];
 		$total_localtax2 = $tabprice[10];
 
-		$localtax1_type = $localtaxes_type[0];
-		$localtax2_type = $localtaxes_type[2];
+		$localtax1_type = (empty($localtaxes_type[0]) ? '' : $localtaxes_type[0]);
+		$localtax2_type = (empty($localtaxes_type[2]) ? '' : $localtaxes_type[2]);
 
 		// TODO A virer
 		// Anciens indicateurs: $price, $remise (a ne plus utiliser)
@@ -1737,8 +1737,8 @@ class Contrat extends CommonObject
 		$sql .= ",tva_tx = ".((float) price2num($tvatx));
 		$sql .= ",localtax1_tx = ".((float) price2num($localtax1tx));
 		$sql .= ",localtax2_tx = ".((float) price2num($localtax2tx));
-		$sql .= ",localtax1_type='".$this->db->escape($localtax1_type);
-		$sql .= ",localtax2_type='".$this->db->escape($localtax2_type);
+		$sql .= ",localtax1_type='".$this->db->escape($localtax1_type)."'";
+		$sql .= ",localtax2_type='".$this->db->escape($localtax2_type)."'";
 		$sql .= ", total_ht = ".((float) price2num($total_ht));
 		$sql .= ", total_tva = ".((float) price2num($total_tva));
 		$sql .= ", total_localtax1 = ".((float) price2num($total_localtax1));
@@ -2580,6 +2580,8 @@ class Contrat extends CommonObject
 				$action = '';
 				$reshook = $hookmanager->executeHooks('createFrom', $parameters, $clonedObj, $action); // Note that $action and $object may have been modified by some hooks
 				if ($reshook < 0) {
+					$this->errors += $hookmanager->errors;
+					$this->error = $hookmanager->error;
 					$error++;
 				}
 			}

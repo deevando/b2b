@@ -716,9 +716,11 @@ class User extends CommonObject
 			'shipping' => 'expedition',
 			'task' => 'task@projet',
 			'fichinter' => 'ficheinter',
+			'propale' => 'propal',
 			'inventory' => 'stock',
 			'invoice' => 'facture',
 			'invoice_supplier' => 'fournisseur',
+			'order_supplier' => 'fournisseur',
 			'knowledgerecord' => 'knowledgerecord@knowledgemanagement',
 			'skill@hrm' => 'all@hrm', // skill / job / position objects rights are for the moment grouped into right level "all"
 			'job@hrm' => 'all@hrm', // skill / job / position objects rights are for the moment grouped into right level "all"
@@ -742,6 +744,7 @@ class User extends CommonObject
 		// If module is abc@module, we check permission user->rights->module->abc->permlevel1
 		$tmp = explode('@', $rightsPath, 2);
 		if (! empty($tmp[1])) {
+			if (strpos($module, '@') !== false) $module = $tmp[1];
 			$rightsPath = $tmp[1];
 			$permlevel2 = $permlevel1;
 			$permlevel1 = $tmp[0];
@@ -3779,7 +3782,7 @@ class User extends CommonObject
 				} else {
 					$sql .= ",".$this->db->prefix()."usergroup_user as ug";
 					$sql .= " WHERE ((ug.fk_user = t.rowid";
-					$sql .= " AND ug.entity IN (".getEntity('user')."))";
+					$sql .= " AND ug.entity IN (".getEntity('usergroup')."))";
 					$sql .= " OR t.entity = 0)"; // Show always superadmin
 				}
 			} else {

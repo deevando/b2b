@@ -2040,7 +2040,7 @@ if ($action == 'create') {
 		print $societe->getNomUrl(1, 'supplier');
 		print '<input type="hidden" name="socid" value="'.$societe->id.'">';
 	} else {
-		print img_picto('', 'company').$form->select_company(!empty($societe->id) ? $societe->id : 0, 'socid', 's.fournisseur=1', 'SelectThirdParty', 0, 0, null, 0, 'minwidth300 widthcentpercentminusxx maxwidth500');
+		print img_picto('', 'company').$form->select_company(empty($societe->id) ? 0 : $societe->id, 'socid', '(s.fournisseur = 1 and s.status = 1)', 'SelectThirdParty', 0, 0, null, 0, 'minwidth300 widthcentpercentminusxx maxwidth500');
 		// reload page to retrieve supplier informations
 		if (!empty($conf->global->RELOAD_PAGE_ON_SUPPLIER_CHANGE)) {
 			print '<script type="text/javascript">
@@ -2616,7 +2616,9 @@ if ($action == 'create') {
 			$multicurrency_totaldeposits = $object->getSumDepositsUsed(1);
 			$multicurrency_resteapayer = price2num($object->multicurrency_total_ttc - $multicurrency_totalpaid - $multicurrency_totalcreditnotes - $multicurrency_totaldeposits, 'MT');
 			// Code to fix case of corrupted data
-			if ($resteapayer == 0 && $multicurrency_resteapayer != 0) {
+			// TODO We should not need this. Also data comes from not reliable value of $object->multicurrency_total_ttc that may be wrong if it was
+			// calculated by summing lines that were in a currency for some of them and into another for others (lines from discount/down payment into another currency for example)
+			if ($resteapayer == 0 && $multicurrency_resteapayer != 0 && $object->multicurrency_code != $conf->currency) {
 				$resteapayer = price2num($multicurrency_resteapayer / $object->multicurrency_tx, 'MT');
 			}
 		}
@@ -2626,7 +2628,7 @@ if ($action == 'create') {
 		}
 		$resteapayeraffiche = $resteapayer;
 
-		if (!empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) {	// Never use this
+		if (!empty($conf->global->FACTURE_SUPPLIER_DEPOSITS_ARE_JUST_PAYMENTS)) {	// Never use this
 			$filterabsolutediscount = "fk_invoice_supplier_source IS NULL"; // If we want deposit to be substracted to payments only and not to total of final invoice
 			$filtercreditnote = "fk_invoice_supplier_source IS NOT NULL"; // If we want deposit to be substracted to payments only and not to total of final invoice
 		} else {
@@ -2938,7 +2940,7 @@ if ($action == 'create') {
 		}
 		if (isset($objectidnext) && $objectidnext > 0) {
 			$facthatreplace = new FactureFournisseur($db);
-			$facthatreplace->fetch($facidnext);
+			$facthatreplace->fetch($objectidnext);
 			print ' ('.$langs->transnoentities("ReplacedByInvoice", $facthatreplace->getNomUrl(1)).')';
 		}
 		if ($object->type == FactureFournisseur::TYPE_CREDIT_NOTE || $object->type == FactureFournisseur::TYPE_DEPOSIT) {
@@ -3503,7 +3505,7 @@ if ($action == 'create') {
 				}
 				print '</span>';
 				print '</td>';
-				print '<td class="right'.($resteapayeraffiche ? ' amountremaintopay' : (' '.$cssforamountpaymentcomplete)).'">'.(!empty($object->multicurrency_code) ? $object->multicurrency_code : $conf->currency).' '.price(price2num($object->multicurrency_tx*$resteapayeraffiche, 'MT')).'</td><td>&nbsp;</td></tr>';
+				print '<td class="right'.($resteapayeraffiche ? ' amountremaintopay' : (' '.$cssforamountpaymentcomplete)).'">'.(!empty($object->multicurrency_code) ? $object->multicurrency_code : $conf->currency).' '.price(price2num($multicurrency_resteapayer, 'MT')).'</td><td>&nbsp;</td></tr>';
 			}
 		} else // Credit note
 		{

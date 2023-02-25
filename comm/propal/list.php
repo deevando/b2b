@@ -203,13 +203,13 @@ if (empty($user->socid)) {
 $checkedtypetiers = 0;
 $arrayfields = array(
 	'p.ref'=>array('label'=>"Ref", 'checked'=>1),
-	'p.ref_client'=>array('label'=>"RefCustomer", 'checked'=>1),
+	'p.ref_client'=>array('label'=>"RefCustomer", 'checked'=>-1),
 	'pr.ref'=>array('label'=>"ProjectRef", 'checked'=>1, 'enabled'=>(empty($conf->project->enabled) ? 0 : 1)),
 	'pr.title'=>array('label'=>"ProjectLabel", 'checked'=>0, 'enabled'=>(empty($conf->project->enabled) ? 0 : 1)),
 	's.nom'=>array('label'=>"ThirdParty", 'checked'=>1),
 	's.name_alias'=>array('label'=>"AliasNameShort", 'checked'=>-1),
 	's.town'=>array('label'=>"Town", 'checked'=>-1),
-	's.zip'=>array('label'=>"Zip", 'checked'=>1),
+	's.zip'=>array('label'=>"Zip", 'checked'=>-1),
 	'state.nom'=>array('label'=>"StateShort", 'checked'=>0),
 	'country.code_iso'=>array('label'=>"Country", 'checked'=>0),
 	'typent.code'=>array('label'=>"ThirdPartyType", 'checked'=>$checkedtypetiers),
@@ -277,7 +277,7 @@ if (!GETPOST('confirmmassaction', 'alpha') && $massaction != 'presend' && $massa
 	$massaction = '';
 }
 
-$parameters = array('socid'=>$socid);
+$parameters = array('socid'=>$socid, 'arrayfields'=>&$arrayfields);
 $reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
 if ($reshook < 0) {
 	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
@@ -1372,6 +1372,14 @@ if ($resql) {
 
 	print "</tr>\n";
 
+	$totalarray = array(
+		'nbfield' => 0,
+		'val' => array(
+			'p.total_ht' => 0,
+			'p.total_tva' => 0,
+			'p.total_ttc' => 0,
+		),
+	);
 
 	// Fields title
 	print '<tr class="liste_titre">';
@@ -1489,14 +1497,6 @@ if ($resql) {
 	if (!empty($arrayfields['total_mark_rate']['checked'])) {
 		print_liste_field_titre($arrayfields['total_mark_rate']['label'], $_SERVER['PHP_SELF'], '', '', $param, 'class="right"', $sortfield, $sortorder);
 	}
-	$totalarray = array(
-		'nbfield' => 0,
-		'val' => array(
-			'p.total_ht' => 0,
-			'p.total_tva' => 0,
-			'p.total_ttc' => 0,
-		),
-	);
 	// Extra fields
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_title.tpl.php';
 	// Hook fields
@@ -1508,6 +1508,7 @@ if ($resql) {
 		'totalarray' => &$totalarray,
 	);
 	$reshook = $hookmanager->executeHooks('printFieldListTitle', $parameters); // Note that $action and $object may have been modified by hook
+
 	print $hookmanager->resPrint;
 	if (!empty($arrayfields['p.datec']['checked'])) {
 		print_liste_field_titre($arrayfields['p.datec']['label'], $_SERVER["PHP_SELF"], "p.datec", "", $param, 'align="center" class="nowrap"', $sortfield, $sortorder);
@@ -1547,6 +1548,9 @@ if ($resql) {
 	$total_ht = 0;
 	$total_margin = 0;
 
+	$savnbfield = $totalarray['nbfield'];
+	$totalarray = array();
+	$totalarray['nbfield'] = 0;
 	$last_num = min($num, $limit);
 	while ($i < $last_num) {
 		$obj = $db->fetch_object($resql);
@@ -1676,7 +1680,7 @@ if ($resql) {
 
 		// Thirdparty
 		if (!empty($arrayfields['s.nom']['checked'])) {
-			print '<td class="tdoverflowmax200">';
+			print '<td class="tdoverflowmax150">';
 			print $companystatic->getNomUrl(1, 'customer');
 			print '</td>';
 			if (!$i) {
@@ -1960,7 +1964,7 @@ if ($resql) {
 
 		// Author
 		if (!empty($arrayfields['u.login']['checked'])) {
-			print '<td class="tdoverflowmax200">';
+			print '<td class="tdoverflowmax150">';
 			if ($userstatic->id) {
 				print $userstatic->getNomUrl(-1);
 			}
@@ -1972,7 +1976,7 @@ if ($resql) {
 
 		if (!empty($arrayfields['sale_representative']['checked'])) {
 			// Sales representatives
-			print '<td class="tdoverflowmax200">';
+			print '<td class="tdoverflowmax150">';
 			if ($obj->socid > 0) {
 				$listsalesrepresentatives = $companystatic->getSalesRepresentatives($user);
 				if ($listsalesrepresentatives < 0) {

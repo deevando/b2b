@@ -1298,11 +1298,11 @@ abstract class CommonObject
 
 	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
 	/**
-	 *    Delete all links between an object $this and all its contacts
+	 *    Delete all links between an object $this and all its contacts in llx_element_contact
 	 *
 	 *	  @param	string	$source		'' or 'internal' or 'external'
 	 *	  @param	string	$code		Type of contact (code or id)
-	 *    @return   int					>0 if OK, <0 if KO
+	 *    @return   int					<0 if KO, 0=Nothing done, >0 if OK
 	 */
 	public function delete_linked_contact($source = '', $code = '')
 	{
@@ -1318,11 +1318,15 @@ abstract class CommonObject
 			$listId = implode(",", $temp);
 		}
 
+		// If $listId is empty, we have not criteria on fk_c_type_contact so we will delete record on element_id for
+		// any type or record instead of only the ones of the current object. So we do nothing in such a case.
+		if (empty($listId)) {
+			return 0;
+		}
+
 		$sql = "DELETE FROM ".$this->db->prefix()."element_contact";
 		$sql .= " WHERE element_id = ".((int) $this->id);
-		if (!empty($listId)) {
-			$sql .= " AND fk_c_type_contact IN (".$this->db->sanitize($listId).")";
-		}
+		$sql .= " AND fk_c_type_contact IN (".$this->db->sanitize($listId).")";
 
 		dol_syslog(get_class($this)."::delete_linked_contact", LOG_DEBUG);
 		if ($this->db->query($sql)) {
@@ -2176,7 +2180,7 @@ abstract class CommonObject
 					$sql .= " AND te.entity IS NOT NULL"; // Show all users
 				} else {
 					$sql .= " AND ug.fk_user = te.rowid";
-					$sql .= " AND ug.entity IN (".getEntity($this->element).")";
+					$sql .= " AND ug.entity IN (".getEntity('usergroup').")";
 				}
 			} else {
 				$sql .= ' AND te.entity IN ('.getEntity($this->element).')';
@@ -2246,7 +2250,7 @@ abstract class CommonObject
 					$sql .= " AND te.entity IS NOT NULL"; // Show all users
 				} else {
 					$sql .= " AND ug.fk_user = te.rowid";
-					$sql .= " AND ug.entity IN (".getEntity($this->element).")";
+					$sql .= " AND ug.entity IN (".getEntity('usergroup').")";
 				}
 			} else {
 				$sql .= ' AND te.entity IN ('.getEntity($this->element).')';
@@ -3554,7 +3558,7 @@ abstract class CommonObject
 
 		$forcedroundingmode = $roundingadjust;
 		if ($forcedroundingmode == 'auto' && isset($conf->global->MAIN_ROUNDOFTOTAL_NOT_TOTALOFROUND)) {
-			$forcedroundingmode = $conf->global->MAIN_ROUNDOFTOTAL_NOT_TOTALOFROUND;
+			$forcedroundingmode = getDolGlobalString('MAIN_ROUNDOFTOTAL_NOT_TOTALOFROUND');
 		} elseif ($forcedroundingmode == 'auto') {
 			$forcedroundingmode = '0';
 		}
@@ -3679,14 +3683,17 @@ abstract class CommonObject
 						}
 						$sqlfix = "UPDATE ".$this->db->prefix().$this->table_element_line." SET ".$fieldtva." = ".price2num($obj->total_tva - $diff).", total_ttc = ".price2num($obj->total_ttc - $diff)." WHERE rowid = ".((int) $obj->rowid);
 						dol_syslog('We found a difference of '.$diff.' for line rowid = '.$obj->rowid.". We fix the total_vat and total_ttc of line by running sqlfix = ".$sqlfix);
-								$resqlfix = $this->db->query($sqlfix);
+
+						$resqlfix = $this->db->query($sqlfix);
+
 						if (!$resqlfix) {
 							dol_print_error($this->db, 'Failed to update line');
 						}
-								$this->total_tva -= $diff;
-								$this->total_ttc -= $diff;
-								$total_tva_by_vats[$obj->vatrate] -= $diff;
-								$total_ttc_by_vats[$obj->vatrate] -= $diff;
+
+						$this->total_tva = (float) price2num($this->total_tva - $diff, '', 1);
+						$this->total_ttc = (float) price2num($this->total_ttc - $diff, '', 1);
+						$total_tva_by_vats[$obj->vatrate] = (float) price2num($total_tva_by_vats[$obj->vatrate] - $diff, '', 1);
+						$total_ttc_by_vats[$obj->vatrate] = (float) price2num($total_ttc_by_vats[$obj->vatrate] - $diff, '', 1);
 					}
 				}
 
@@ -3713,9 +3720,16 @@ abstract class CommonObject
 				}
 			}
 
+			// Clean total
+			$this->total_ht = (float) price2num($this->total_ht);
+			$this->total_tva = (float) price2num($this->total_tva);
+			$this->total_localtax1 = (float) price2num($this->total_localtax1);
+			$this->total_localtax2 = (float) price2num($this->total_localtax2);
+			$this->total_ttc = (float) price2num($this->total_ttc);
+
 			$this->db->free($resql);
 
-			// Now update global field total_ht, total_ttc, total_tva, total_localtax1, total_localtax2, multicurrency_total_*
+			// Now update global fields total_ht, total_ttc, total_tva, total_localtax1, total_localtax2, multicurrency_total_*
 			$fieldht = 'total_ht';
 			$fieldtva = 'tva';
 			$fieldlocaltax1 = 'localtax1';
@@ -3746,11 +3760,11 @@ abstract class CommonObject
 
 			if (empty($nodatabaseupdate)) {
 				$sql = "UPDATE ".$this->db->prefix().$this->table_element.' SET';
-				$sql .= " ".$fieldht." = ".((float) price2num($this->total_ht)).",";
-				$sql .= " ".$fieldtva." = ".((float) price2num($this->total_tva)).",";
-				$sql .= " ".$fieldlocaltax1." = ".((float) price2num($this->total_localtax1)).",";
-				$sql .= " ".$fieldlocaltax2." = ".((float) price2num($this->total_localtax2)).",";
-				$sql .= " ".$fieldttc." = ".((float) price2num($this->total_ttc));
+				$sql .= " ".$fieldht." = ".((float) price2num($this->total_ht, 'MT', 1)).",";
+				$sql .= " ".$fieldtva." = ".((float) price2num($this->total_tva, 'MT', 1)).",";
+				$sql .= " ".$fieldlocaltax1." = ".((float) price2num($this->total_localtax1, 'MT', 1)).",";
+				$sql .= " ".$fieldlocaltax2." = ".((float) price2num($this->total_localtax2, 'MT', 1)).",";
+				$sql .= " ".$fieldttc." = ".((float) price2num($this->total_ttc, 'MT', 1));
 				$sql .= ", multicurrency_total_ht = ".((float) price2num($this->multicurrency_total_ht, 'MT', 1));
 				$sql .= ", multicurrency_total_tva = ".((float) price2num($this->multicurrency_total_tva, 'MT', 1));
 				$sql .= ", multicurrency_total_ttc = ".((float) price2num($this->multicurrency_total_ttc, 'MT', 1));
@@ -3779,7 +3793,7 @@ abstract class CommonObject
 
 	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
 	/**
-	 *	Add objects linked in llx_element_element.
+	 *	Add an object link into llx_element_element.
 	 *
 	 *	@param		string	$origin		Linked element type
 	 *	@param		int		$origin_id	Linked element id
@@ -4102,6 +4116,21 @@ abstract class CommonObject
 	}
 
 	/**
+	 *	Clear the cache saying that all linked object were already loaded. So next fetchObjectLinked will reload all links.
+	 *
+	 *	@return int						<0 if KO, >0 if OK
+	 *  @see	fetchObjectLinked()
+	 */
+	public function clearObjectLinkedCache()
+	{
+		if ($this->id > 0 && !empty($this->linkedObjectsFullLoaded[$this->id])) {
+			unset($this->linkedObjectsFullLoaded[$this->id]);
+		}
+
+		return 1;
+	}
+
+	/**
 	 *	Update object linked of a current object
 	 *
 	 *	@param	int		$sourceid		Object source id
@@ -4315,7 +4344,7 @@ abstract class CommonObject
 	 *      @param	int		$status			Status to set
 	 *      @param	int		$elementId		Id of element to force (use this->id by default if null)
 	 *      @param	string	$elementType	Type of element to force (use this->table_element by default)
-	 *      @param	string	$trigkey		Trigger key to use for trigger. Use '' means automatic but it not recommended and is deprecated.
+	 *      @param	string	$trigkey		Trigger key to use for trigger. Use '' means automatic but it is not recommended and is deprecated.
 	 *      @param	string	$fieldstatus	Name of status field in this->table_element
 	 *      @return int						<0 if KO, >0 if OK
 	 */
@@ -4365,41 +4394,49 @@ abstract class CommonObject
 		if ($status == 1 && in_array($elementTable, array('inventory'))) {
 			$sql .= ", date_validation = '".$this->db->idate(dol_now())."'";
 		}
-		$sql .= " WHERE rowid=".((int) $elementId);
+		$sql .= " WHERE rowid = ".((int) $elementId);
+		$sql .= " AND ".$fieldstatus." <> ".((int) $status);	// We avoid update if status already correct
 
 		dol_syslog(get_class($this)."::setStatut", LOG_DEBUG);
-		if ($this->db->query($sql)) {
+		$resql = $this->db->query($sql);
+		if ($resql) {
 			$error = 0;
 
-			// Try autoset of trigkey
-			if (empty($trigkey)) {
-				if ($this->element == 'supplier_proposal' && $status == 2) {
-					$trigkey = 'SUPPLIER_PROPOSAL_SIGN'; // 2 = SupplierProposal::STATUS_SIGNED. Can't use constant into this generic class
-				}
-				if ($this->element == 'supplier_proposal' && $status == 3) {
-					$trigkey = 'SUPPLIER_PROPOSAL_REFUSE'; // 3 = SupplierProposal::STATUS_REFUSED. Can't use constant into this generic class
-				}
-				if ($this->element == 'supplier_proposal' && $status == 4) {
-					$trigkey = 'SUPPLIER_PROPOSAL_CLOSE'; // 4 = SupplierProposal::STATUS_CLOSED. Can't use constant into this generic class
-				}
-				if ($this->element == 'fichinter' && $status == 3) {
-					$trigkey = 'FICHINTER_CLASSIFY_DONE';
-				}
-				if ($this->element == 'fichinter' && $status == 2) {
-					$trigkey = 'FICHINTER_CLASSIFY_BILLED';
-				}
-				if ($this->element == 'fichinter' && $status == 1) {
-					$trigkey = 'FICHINTER_CLASSIFY_UNBILLED';
-				}
-			}
+			$nb_rows_affected = $this->db->affected_rows($resql);	// should be 1 or 0 if status was already correct
 
-			if ($trigkey) {
-				// Call trigger
-				$result = $this->call_trigger($trigkey, $user);
-				if ($result < 0) {
-					$error++;
+			if ($nb_rows_affected > 0) {
+				if (empty($trigkey)) {
+					// Try to guess trigkey (for backward compatibility, now we should have trigkey defined into the call of setStatus)
+					if ($this->element == 'supplier_proposal' && $status == 2) {
+						$trigkey = 'SUPPLIER_PROPOSAL_SIGN'; // 2 = SupplierProposal::STATUS_SIGNED. Can't use constant into this generic class
+					}
+					if ($this->element == 'supplier_proposal' && $status == 3) {
+						$trigkey = 'SUPPLIER_PROPOSAL_REFUSE'; // 3 = SupplierProposal::STATUS_REFUSED. Can't use constant into this generic class
+					}
+					if ($this->element == 'supplier_proposal' && $status == 4) {
+						$trigkey = 'SUPPLIER_PROPOSAL_CLOSE'; // 4 = SupplierProposal::STATUS_CLOSED. Can't use constant into this generic class
+					}
+					if ($this->element == 'fichinter' && $status == 3) {
+						$trigkey = 'FICHINTER_CLASSIFY_DONE';
+					}
+					if ($this->element == 'fichinter' && $status == 2) {
+						$trigkey = 'FICHINTER_CLASSIFY_BILLED';
+					}
+					if ($this->element == 'fichinter' && $status == 1) {
+						$trigkey = 'FICHINTER_CLASSIFY_UNBILLED';
+					}
 				}
-				// End call triggers
+
+				if ($trigkey) {
+					// Call trigger
+					$result = $this->call_trigger($trigkey, $user);
+					if ($result < 0) {
+						$error++;
+					}
+					// End call triggers
+				}
+			} else {
+				// The status was probably already good. We do nothing more, no triggers.
 			}
 
 			if (!$error) {
@@ -6021,14 +6058,15 @@ abstract class CommonObject
 							//var_dump('key '.$key.' '.$value.' type='.$extrafields->attributes[$this->table_element]['type'][$key].' '.$this->array_options["options_".$key]);
 						}
 					}
+				}
 
-					// If field is a computed field, value must become result of compute
-					foreach ($tab as $key => $value) {
-						if (!empty($extrafields->attributes[$this->table_element]) && !empty($extrafields->attributes[$this->table_element]['computed'][$key])) {
-							//var_dump($conf->disable_compute);
-							if (empty($conf->disable_compute)) {
-								$this->array_options["options_".$key] = dol_eval($extrafields->attributes[$this->table_element]['computed'][$key], 1, 0, '');
-							}
+				// If field is a computed field, value must become result of compute (regardless of whether a row exists
+				// in the element's extrafields table)
+				foreach ($extrafields->attributes[$this->table_element]['label'] as $key => $val) {
+					if (!empty($extrafields->attributes[$this->table_element]) && !empty($extrafields->attributes[$this->table_element]['computed'][$key])) {
+						//var_dump($conf->disable_compute);
+						if (empty($conf->disable_compute)) {
+							$this->array_options["options_".$key] = dol_eval($extrafields->attributes[$this->table_element]['computed'][$key], 1, 0, '');
 						}
 					}
 				}
@@ -7978,7 +8016,7 @@ abstract class CommonObject
 
 					switch ($mode) {
 						case "view":
-							$value = $this->array_options["options_".$key.$keysuffix]; // Value may be clean or formated later
+							$value = ((!empty($this->array_options) && array_key_exists("options_".$key.$keysuffix, $this->array_options)) ? $this->array_options["options_".$key.$keysuffix] : null); // Value may be cleaned or formated later
 							break;
 						case "create":
 						case "edit":
@@ -8094,7 +8132,7 @@ abstract class CommonObject
 
 						if ($display_type == 'card') {
 							$out .= '<tr '.($html_id ? 'id="'.$html_id.'" ' : '').$csstyle.' class="field_options_'.$key.' '.$class.$this->element.'_extras_'.$key.' trextrafields_collapse'.$extrafields_collapse_num.(!empty($this->id)?'_'.$this->id:'').'" '.$domData.' >';
-							if (!empty($conf->global->MAIN_VIEW_LINE_NUMBER) && ($action == 'view' || $action == 'valid' || $action == 'editline')) {
+							if (!empty($conf->global->MAIN_VIEW_LINE_NUMBER) && ($action == 'view' || $action == 'valid' || $action == 'editline' || $action == 'confirm_valid' || $action == 'confirm_cancel')) {
 								$out .= '<td></td>';
 							}
 							$out .= '<td class="titlefieldcreate wordbreak';
@@ -8810,7 +8848,11 @@ abstract class CommonObject
 				// $this->{$field} may be null, '', 0, '0', 123, '123'
 				if ((isset($this->{$field}) && $this->{$field} != '') || !empty($info['notnull'])) {
 					if (!isset($this->{$field})) {
-						$queryarray[$field] = 0;
+						if (!empty($info['default'])) {
+							$queryarray[$field] = $info['default'];
+						} else {
+							$queryarray[$field] = 0;
+						}
 					} else {
 						$queryarray[$field] = (int) $this->{$field};		// If '0', it may be set to null later if $info['notnull'] == -1
 					}
@@ -8997,7 +9039,7 @@ abstract class CommonObject
 
 		// Clean and check mandatory
 		foreach ($keys as $key) {
-			// If field is an implicit foreign key field
+			// If field is an implicit foreign key field (so type = 'integer:...')
 			if (preg_match('/^integer:/i', $this->fields[$key]['type']) && $values[$key] == '-1') {
 				$values[$key] = '';
 			}
@@ -9017,7 +9059,7 @@ abstract class CommonObject
 				$values[$key] = $this->quote($this->fields[$key]['default'], $this->fields[$key]);
 			}
 
-			// If field is an implicit foreign key field
+			// If field is an implicit foreign key field (so type = 'integer:...')
 			if (preg_match('/^integer:/i', $this->fields[$key]['type']) && empty($values[$key])) {
 				if (isset($this->fields[$key]['default'])) {
 					$values[$key] = ((int) $this->fields[$key]['default']);
@@ -9430,6 +9472,12 @@ abstract class CommonObject
 			if (!$res) {
 				$error++;
 			}
+		}
+
+		// Delete linked object
+		$res = $this->deleteObjectLinked();
+		if ($res < 0) {
+			$error++;
 		}
 
 		if (!$error && !empty($this->isextrafieldmanaged)) {

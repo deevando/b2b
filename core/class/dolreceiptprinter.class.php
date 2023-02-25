@@ -755,10 +755,6 @@ class dolReceiptPrinter extends Printer
 						$img = EscposImage::load(DOL_DATA_ROOT.'/mycompany/logos/'.$mysoc->logo);
 						$this->printer->graphics($img);
 						break;
-					case 'DOL_PRINT_VAL_GOOGLE':
-						$img = EscposImage::load(DOL_DATA_ROOT.'/produit/VALGOOGLE/VALGOOGLE-imagen.jpg');
-						$this->printer->bitImage($img);
-						break;
 					case 'DOL_PRINT_LOGO_OLD':
 						$img = EscposImage::load(DOL_DATA_ROOT.'/mycompany/logos/'.$mysoc->logo);
 						$this->printer->bitImage($img);

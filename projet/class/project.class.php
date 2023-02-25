@@ -345,6 +345,7 @@ class Project extends CommonObject
 			$this->fields['accept_booth_suggestions']['enabled'] = 0;
 			$this->fields['price_registration']['enabled'] = 0;
 			$this->fields['price_booth']['enabled'] = 0;
+			$this->fields['max_attendees']['enabled'] = 0;
 		}
 	}
 
@@ -854,11 +855,24 @@ class Project extends CommonObject
 		$listoftables = array(
 			'propal'=>'fk_projet', 'commande'=>'fk_projet', 'facture'=>'fk_projet',
 			'supplier_proposal'=>'fk_projet', 'commande_fournisseur'=>'fk_projet', 'facture_fourn'=>'fk_projet',
-			'expensereport_det'=>'fk_projet', 'contrat'=>'fk_projet', 'fichinter'=>'fk_projet', 'don'=>'fk_projet',
-			'actioncomm'=>'fk_project', 'mrp_mo'=>'fk_project', 'entrepot'=>'fk_project'
+			'expensereport_det'=>'fk_projet', 'contrat'=>'fk_projet',
+			'fichinter'=>'fk_projet',
+			'don'=>array('field'=>'fk_projet', 'module'=>'don'),
+			'actioncomm'=>'fk_project',
+			'mrp_mo'=>'fk_project',
+			'entrepot'=>'fk_project'
 		);
 		foreach ($listoftables as $key => $value) {
-			$sql = "UPDATE ".MAIN_DB_PREFIX.$key." SET ".$value." = NULL where ".$value." = ".((int) $this->id);
+			if (is_array($value)) {
+				if (!isModEnabled($value['module'])) {
+					continue;
+				}
+				$fieldname = $value['field'];
+			} else {
+				$fieldname = $value;
+			}
+			$sql = "UPDATE ".MAIN_DB_PREFIX.$key." SET ".$fieldname." = NULL where ".$fieldname." = ".((int) $this->id);
+
 			$resql = $this->db->query($sql);
 			if (!$resql) {
 				$this->errors[] = $this->db->lasterror();
@@ -880,7 +894,7 @@ class Project extends CommonObject
 		}
 
 		// Fetch tasks
-		$this->getLinesArray($user);
+		$this->getLinesArray($user, 0);
 
 		// Delete tasks
 		$ret = $this->deleteTasks($user);
@@ -2252,14 +2266,15 @@ class Project extends CommonObject
 	/**
 	 * 	Create an array of tasks of current project
 	 *
-	 *  @param  User   $user       Object user we want project allowed to
-	 * 	@return int		           >0 if OK, <0 if KO
+	 *  @param  User	$user       		Object user we want project allowed to
+	 * @param	int		$loadRoleMode		1= will test Roles on task;  0 used in delete project action
+	 * 	@return int							>0 if OK, <0 if KO
 	 */
-	public function getLinesArray($user)
+	public function getLinesArray($user, $loadRoleMode = 1)
 	{
 		require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
 		$taskstatic = new Task($this->db);
 
-		$this->lines = $taskstatic->getTasksArray(0, $user, $this->id, 0, 0);
+		$this->lines = $taskstatic->getTasksArray(0, $user, $this->id, 0, 0, '',  '-1', '', 0, 0, array(),  0,  array(),  0,  $loadRoleMode);
 	}
 }

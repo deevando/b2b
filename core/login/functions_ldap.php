@@ -77,7 +77,7 @@ function check_user_password_ldap($usertotest, $passwordtotest, $entitytotest)
 		$ldapdn = $dolibarr_main_auth_ldap_dn;
 		$ldapadminlogin = $dolibarr_main_auth_ldap_admin_login;
 		$ldapadminpass = $dolibarr_main_auth_ldap_admin_pass;
-		$ldapdebug = (empty($dolibarr_main_auth_ldap_debug) || $dolibarr_main_auth_ldap_debug == "false" ? false : true);
+		$ldapdebug = ((empty($dolibarr_main_auth_ldap_debug) || $dolibarr_main_auth_ldap_debug == "false") ? false : true);
 
 		if ($ldapdebug) {
 			print "DEBUG: Logging LDAP steps<br>\n";
@@ -94,9 +94,9 @@ function check_user_password_ldap($usertotest, $passwordtotest, $entitytotest)
 
 		if ($ldapdebug) {
 			dol_syslog("functions_ldap::check_user_password_ldap Server:".join(',', $ldap->server).", Port:".$ldap->serverPort.", Protocol:".$ldap->ldapProtocolVersion.", Type:".$ldap->serverType);
-			dol_syslog("functions_ldap::check_user_password_ldap uid/samacountname=".$ldapuserattr.", dn=".$ldapdn.", Admin:".$ldap->searchUser.", Pass:".$ldap->searchPassword);
+			dol_syslog("functions_ldap::check_user_password_ldap uid/samaccountname=".$ldapuserattr.", dn=".$ldapdn.", Admin:".$ldap->searchUser.", Pass:".dol_trunc($ldap->searchPassword, 3));
 			print "DEBUG: Server:".join(',', $ldap->server).", Port:".$ldap->serverPort.", Protocol:".$ldap->ldapProtocolVersion.", Type:".$ldap->serverType."<br>\n";
-			print "DEBUG: uid/samacountname=".$ldapuserattr.", dn=".$ldapdn.", Admin:".$ldap->searchUser.", Pass:".$ldap->searchPassword."<br>\n";
+			print "DEBUG: uid/samaccountname=".$ldapuserattr.", dn=".$ldapdn.", Admin:".$ldap->searchUser.", Pass:".dol_trunc($ldap->searchPassword, 3)."<br>\n";
 		}
 
 		$resultFetchLdapUser = 0;
@@ -233,12 +233,14 @@ function check_user_password_ldap($usertotest, $passwordtotest, $entitytotest)
 
 					$usertmp = new User($db);
 					$usertmp->fetch('', $login);
-					$ret = $mc->checkRight($usertmp->id, $entitytotest);
-					if ($ret < 0) {
-						dol_syslog("functions_ldap::check_user_password_ldap Authentication KO entity '".$entitytotest."' not allowed for user id '".$usertmp->id."'", LOG_NOTICE);
-						$login = ''; // force authentication failure
+					if (is_object($mc)) {
+						$ret = $mc->checkRight($usertmp->id, $entitytotest);
+						if ($ret < 0) {
+							dol_syslog("functions_ldap::check_user_password_ldap Authentication KO entity '".$entitytotest."' not allowed for user id '".$usertmp->id."'", LOG_NOTICE);
+							$login = ''; // force authentication failure
+						}
+						unset($usertmp);
 					}
-					unset($usertmp);
 				}
 			}
 			if ($result == 1) {
@@ -265,7 +267,7 @@ function check_user_password_ldap($usertotest, $passwordtotest, $entitytotest)
 				$ldap->ldapErrorText = ldap_error($ldap->connection);
 				dol_syslog("functions_ldap::check_user_password_ldap ".$ldap->ldapErrorCode." ".$ldap->ldapErrorText);
 			}
-			sleep(2); // Anti brut force protection
+			sleep(1); // Anti brut force protection
 
 			// Load translation files required by the page
 			$langs->loadLangs(array('main', 'other', 'errors'));

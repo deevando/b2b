@@ -744,7 +744,7 @@ if (!$error && $massaction == "builddoc" && $permissiontoread && !GETPOST('butto
 		$arrayofinclusion[] = '^'.preg_quote(dol_sanitizeFileName($tmppdf), '/').'\.pdf$';
 	}
 	foreach ($listofobjectref as $tmppdf) {
-		$arrayofinclusion[] = '^'.preg_quote(dol_sanitizeFileName($tmppdf), '/').'_[a-zA-Z0-9-_]+\.pdf$'; // To include PDF generated from ODX files
+		$arrayofinclusion[] = '^'.preg_quote(dol_sanitizeFileName($tmppdf), '/').'_[a-zA-Z0-9\-\_\']+\.pdf$'; // To include PDF generated from ODX files
 	}
 	$listoffiles = dol_dir_list($uploaddir, 'all', 1, implode('|', $arrayofinclusion), '\.meta$|\.png', 'date', SORT_DESC, 0, true);
 
@@ -1040,8 +1040,9 @@ if (!$error && ($massaction == 'delete' || ($action == 'delete' && $confirm == '
 			}
 
 			if ($objectclass == 'Holiday' && ! in_array($objecttmp->statut, array(Holiday::STATUS_DRAFT, Holiday::STATUS_CANCELED, Holiday::STATUS_REFUSED))) {
+				$langs->load("errors");
 				$nbignored++;
-				$resaction .= '<div class="error">'.$langs->trans('ErrorLeaveRequestMustBeDraftCanceledOrRefusedToBeDeleted', $objecttmp->ref).'</div><br>';
+				$TMsg[] = '<div class="error">'.$langs->trans('ErrorLeaveRequestMustBeDraftCanceledOrRefusedToBeDeleted', $objecttmp->ref).'</div><br>';
 				continue;
 			}
 
@@ -1107,7 +1108,6 @@ if (!$error && ($massaction == 'delete' || ($action == 'delete' && $confirm == '
 // @todo : propose model selection
 if (!$error && $massaction == 'generate_doc' && $permissiontoread) {
 	$db->begin();
-
 	$objecttmp = new $objectclass($db);
 	$nbok = 0;
 	foreach ($toselect as $toselectid) {
@@ -1115,7 +1115,6 @@ if (!$error && $massaction == 'generate_doc' && $permissiontoread) {
 		if ($result > 0) {
 			$outputlangs = $langs;
 			$newlang = '';
-
 			if ($conf->global->MAIN_MULTILANGS && empty($newlang) && GETPOST('lang_id', 'aZ09')) {
 				$newlang = GETPOST('lang_id', 'aZ09');
 			}
@@ -1124,6 +1123,10 @@ if (!$error && $massaction == 'generate_doc' && $permissiontoread) {
 			}
 			if ($conf->global->MAIN_MULTILANGS && empty($newlang) && isset($objecttmp->default_lang)) {
 				$newlang = $objecttmp->default_lang; // for thirdparty
+			}
+			if ($conf->global->MAIN_MULTILANGS && empty($newlang) && empty($objecttmp->thirdparty)) { //load lang from thirdparty
+				$objecttmp->fetch_thirdparty();
+				$newlang = $objecttmp->thirdparty->default_lang; // for proposal, order, invoice, ...
 			}
 			if (!empty($newlang)) {
 				$outputlangs = new Translate("", $conf);
@@ -1416,7 +1419,7 @@ if (!$error && ($massaction == 'approveleave' || ($action == 'approveleave' && $
 
 				// If no SQL error, we redirect to the request form
 				if (!$error) {
-					// Calculcate number of days consummed
+					// Calculcate number of days consumed
 					$nbopenedday = num_open_day($objecttmp->date_debut_gmt, $objecttmp->date_fin_gmt, 0, 1, $objecttmp->halfday);
 					$soldeActuel = $objecttmp->getCpforUser($objecttmp->fk_user, $objecttmp->fk_type);
 					$newSolde = ($soldeActuel - $nbopenedday);

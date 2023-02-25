@@ -246,7 +246,6 @@ if ($modecompta == "CREANCES-DETTES") {
 	} else {
 		$description .= $langs->trans("DepositsAreIncluded");
 	}
-
 	$builddate = dol_now();
 } elseif ($modecompta == "RECETTES-DEPENSES") {
 	$name = $langs->trans("TurnoverCollected").', '.$langs->trans("ByProductsAndServices");
@@ -324,7 +323,7 @@ if ($modecompta == 'CREANCES-DETTES') {
 	}
 	if ($selected_cat === -2) {	// Without any category
 		$sql .= " AND cp.fk_product is null";
-	} elseif ($selected_cat) {	// Into a specific category
+	} elseif ($selected_cat > 0) {	// Into a specific category
 		if ($subcat) {
 			$TListOfCats = $categorie->get_full_arbo('product', $selected_cat, 1);
 

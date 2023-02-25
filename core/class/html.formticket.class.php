@@ -73,6 +73,8 @@ class FormTicket
 	public $withfile;
 	public $withfilereadonly;
 
+	public $backtopage;
+
 	public $ispublic; // To show information or not into public form
 
 	public $withtitletopic;
@@ -140,9 +142,10 @@ class FormTicket
 	 * @param	string			$mode					Mode ('create' or 'edit')
 	 * @param	int				$public					1=If we show the form for the public interface
 	 * @param	Contact|null	$with_contact			[=NULL] Contact to link to this ticket if exists
+	 * @param	string			$action					[=''] Action in card
 	 * @return 	void
 	 */
-	public function showForm($withdolfichehead = 0, $mode = 'edit', $public = 0, Contact $with_contact = null)
+	public function showForm($withdolfichehead = 0, $mode = 'edit', $public = 0, Contact $with_contact = null, $action = '')
 	{
 		global $conf, $langs, $user, $hookmanager;
 
@@ -424,7 +427,7 @@ class FormTicket
 		$doleditor->Create();
 		print '</td></tr>';
 
-		if ($public && !empty($conf->global->MAIN_SECURITY_ENABLECAPTCHA)) {
+		if ($public && !empty($conf->global->MAIN_SECURITY_ENABLECAPTCHA_TICKET)) {
 			require_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
 			print '<tr><td class="titlefield"><label for="email"><span class="fieldrequired">'.$langs->trans("SecurityCode").'</span></label></td><td>';
 			print '<span class="span-icon-security inline-block">';
@@ -632,7 +635,7 @@ class FormTicket
 
 		// Other attributes
 		$parameters = array();
-		$reshook = $hookmanager->executeHooks('formObjectOptions', $parameters, $ticketstat, $this->action); // Note that $action and $object may have been modified by hook
+		$reshook = $hookmanager->executeHooks('formObjectOptions', $parameters, $ticketstat, $action); // Note that $action and $object may have been modified by hook
 		if (empty($reshook)) {
 			print $ticketstat->showOptionals($extrafields, 'create');
 		}
@@ -1358,6 +1361,7 @@ class FormTicket
 		print '<input type="hidden" name="token" value="'.newToken().'">';
 		print '<input type="hidden" name="action" value="'.$this->action.'">';
 		print '<input type="hidden" name="actionbis" value="add_message">';
+		print '<input type="hidden" name="backtopage" value="'.$this->backtopage.'">';
 		foreach ($this->param as $key => $value) {
 			print '<input type="hidden" name="'.$key.'" value="'.$value.'">';
 		}

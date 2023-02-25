@@ -2426,9 +2426,10 @@ class Form
 	 * @param string $morecss Add more css on select
 	 * @param string $nooutput No print, return the output into a string
 	 * @param int $forcecombo Force to use combo box
+	 * @param array $TProducts  Add filter on a defined product
 	 * @return        void|string
 	 */
-	public function select_bom($selected = '', $htmlname = 'bom_id', $limit = 0, $status = 1, $type = 1, $showempty = '1', $morecss = '', $nooutput = '', $forcecombo = 0)
+	public function select_bom($selected = '', $htmlname = 'bom_id', $limit = 0, $status = 1, $type = 0, $showempty = '1', $morecss = '', $nooutput = '', $forcecombo = 0, $TProducts = [])
 	{
 		// phpcs:enable
 		global $conf, $user, $langs, $db;
@@ -2450,8 +2451,9 @@ class Form
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'bom_bom as b';
 		$sql.= ' WHERE b.entity IN ('.getEntity('bom').')';
 		if (!empty($status)) $sql.= ' AND status = '. (int) $status;
-		if (!empty($type)) $sql.= ' AND status = '. (int) $type;
-		if (!empty($limit)) $sql.= 'LIMIT '. (int) $limit;
+		if (!empty($type)) $sql.= ' AND bomtype = '. (int) $type;
+		if (!empty($TProducts)) $sql .= ' AND fk_product IN ('.$this->db->sanitize(implode(',', $TProducts)).')';
+		if (!empty($limit)) $sql.= ' LIMIT '. (int) $limit;
 		$resql = $db->query($sql);
 		if ($resql) {
 			if ($showempty)	{
@@ -2462,8 +2464,9 @@ class Form
 			while ($obj = $db->fetch_object($resql)) {
 				$product = new Product($db);
 				$res = $product->fetch($obj->fk_product);
-				if ($obj->rowid == $selected) $out .= '<option value="'.$obj->rowid.'" selected>'.$obj->ref.' - '. $product->label .' - '.$obj->label.'</option>';
-				$out .= '<option value="'.$obj->rowid.'">'.$obj->ref.' - '.$product->label .' - '. $obj->label.'</option>';
+				$out .= '<option value="'.$obj->rowid.'"';
+				if ($obj->rowid == $selected) $out .= 'selected';
+				$out .= '>'.$obj->ref.' - '.$product->label .' - '. $obj->label.'</option>';
 			}
 		} else {
 			$error++;
@@ -3146,6 +3149,8 @@ class Form
 			'type'=>$outtype,
 			'price_ht'=>price2num($outprice_ht),
 			'price_ttc'=>price2num($outprice_ttc),
+			'price_ht_locale'=>price(price2num($outprice_ht)),
+			'price_ttc_locale'=>price(price2num($outprice_ttc)),
 			'pricebasetype'=>$outpricebasetype,
 			'tva_tx'=>$outtva_tx,
 			'default_vat_code'=>$outdefault_vat_code,
@@ -3247,9 +3252,9 @@ class Form
 		$sql .= " pfp.supplier_reputation";
 		// if we use supplier description of the products
 		if (!empty($conf->global->PRODUIT_FOURN_TEXTS)) {
-			$sql .= " ,pfp.desc_fourn as description";
+			$sql .= ", pfp.desc_fourn as description";
 		} else {
-			$sql .= " ,p.description";
+			$sql .= ", p.description";
 		}
 		// Units
 		if (!empty($conf->global->PRODUCT_USE_UNITS)) {
@@ -3532,7 +3537,13 @@ class Form
 					$opt .= ' disabled';
 				}
 				if (!empty($objp->idprodfournprice) && $objp->idprodfournprice > 0) {
-					$opt .= ' data-product-id="'.$objp->rowid.'" data-price-id="'.$objp->idprodfournprice.'" data-qty="'.$objp->quantity.'" data-up="'.$objp->unitprice.'" data-discount="'.$outdiscount.'" data-tvatx="'.$objp->tva_tx.'"';
+					$opt .= ' data-product-id="'.dol_escape_htmltag($objp->rowid).'"';
+					$opt .= ' data-price-id="'.dol_escape_htmltag($objp->idprodfournprice).'"';
+					$opt .= ' data-qty="'.dol_escape_htmltag($objp->quantity).'"';
+					$opt .= ' data-up="'.dol_escape_htmltag($objp->unitprice).'"';
+					$opt .= ' data-up-locale="'.dol_escape_htmltag(price($objp->unitprice)).'"';
+					$opt .= ' data-discount="'.dol_escape_htmltag($outdiscount).'"';
+					$opt .= ' data-tvatx="'.dol_escape_htmltag($objp->tva_tx).'"';
 				}
 				$opt .= ' data-description="'.dol_escape_htmltag($objp->description, 0, 1).'"';
 				$opt .= ' data-html="'.dol_escape_htmltag($optlabel).'"';
@@ -3553,9 +3564,11 @@ class Form
 						'value'=>$outref,
 						'label'=>$outval,
 						'qty'=>$outqty,
-						'price_qty_ht'=>price2num($objp->fprice, 'MU'),	// Keep higher resolution for price for the min qty
+						'price_qty_ht'=>price2num($objp->fprice, 'MU'),		// Keep higher resolution for price for the min qty
 						'price_unit_ht'=>price2num($objp->unitprice, 'MU'),	// This is used to fill the Unit Price
 						'price_ht'=>price2num($objp->unitprice, 'MU'),		// This is used to fill the Unit Price (for compatibility)
+						'price_qty_ht_locale'=>price($objp->fprice),
+						'price_unit_ht_locale'=>price($objp->unitprice),
 						'tva_tx'=>$objp->tva_tx,
 						'default_vat_code'=>$objp->default_vat_code,
 						'discount'=>$outdiscount,
@@ -5141,6 +5154,12 @@ class Form
 						},';
 			}
 
+			$jsforcursor = '';
+			if (empty($useajax)) {
+				$jsforcursor = '// The call to urljump can be slow, so we set the wait cursor'."\n";
+				$jsforcursor .= 'jQuery("html,body,#id-container").addClass("cursorwait");'."\n";
+			}
+
 			$formconfirm .= '
                     resizable: false,
                     height: "'.$height.'",
@@ -5152,7 +5171,8 @@ class Form
                         	var options = "&token='.urlencode(newToken()).'";
                         	var inputok = '.json_encode($inputok).';	/* List of fields into form */
                          	var pageyes = "'.dol_escape_js(!empty($pageyes) ? $pageyes : '').'";
-                         	if (inputok.length>0) {
+
+                         	if (inputok.length > 0) {
                          		$.each(inputok, function(i, inputname) {
                          			var more = "";
 									var inputvalue;
@@ -5168,14 +5188,18 @@ class Form
                          		});
                          	}
                          	var urljump = pageyes + (pageyes.indexOf("?") < 0 ? "?" : "") + options;
-            				if (pageyes.length > 0) { location.href = urljump; }
-                            $(this).dialog("close");
+            				if (pageyes.length > 0) {
+							'.$jsforcursor.'
+								location.href = urljump;
+								console.log("after location.href");
+							}
+	                        $(this).dialog("close");
                         },
                         "'.dol_escape_js($langs->transnoentities($labelbuttonno)).'": function() {
                         	var options = "&token='.urlencode(newToken()).'";
                          	var inputko = '.json_encode($inputko).';	/* List of fields into form */
                          	var pageno="'.dol_escape_js(!empty($pageno) ? $pageno : '').'";
-                         	if (inputko.length>0) {
+                         	if (inputko.length > 0) {
                          		$.each(inputko, function(i, inputname) {
                          			var more = "";
                          			if ($("#" + inputname).attr("type") == "checkbox") { more = ":checked"; }
@@ -5186,7 +5210,11 @@ class Form
                          	}
                          	var urljump=pageno + (pageno.indexOf("?") < 0 ? "?" : "") + options;
                          	//alert(urljump);
-            				if (pageno.length > 0) { location.href = urljump; }
+            				if (pageno.length > 0) {
+							'.$jsforcursor.'
+								location.href = urljump;
+								console.log("after location.href");
+							}
                             $(this).dialog("close");
                         }
                     }
@@ -5686,7 +5714,7 @@ class Form
 			print '<input type="hidden" name="token" value="'.newToken().'">';
 			print '<div class="inline-block">';
 			if (!empty($discount_type)) {
-				if (!empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) {
+				if (!empty($conf->global->FACTURE_SUPPLIER_DEPOSITS_ARE_JUST_PAYMENTS)) {
 					if (!$filter || $filter == "fk_invoice_supplier_source IS NULL") {
 						$translationKey = 'HasAbsoluteDiscountFromSupplier'; // If we want deposit to be substracted to payments only and not to total of final invoice
 					} else {
@@ -8142,6 +8170,7 @@ class Form
 							if(! data.id) return null;';
 
 			if ($callurlonselect) {
+				// We forge the url with 'sall='
 				$outdelayed .= '
 
 							var urlBase = data.url;

@@ -235,6 +235,7 @@ if ($action == 'add_import_model') {
 		$result = $objimport->create($user);
 		if ($result >= 0) {
 			setEventMessages($langs->trans("ImportModelSaved", $objimport->model_name), null, 'mesgs');
+			$import_name = '';
 		} else {
 			$langs->load("errors");
 			if ($objimport->errno == 'DB_ERROR_RECORD_ALREADY_EXISTS') {
@@ -814,17 +815,21 @@ if ($step == 4 && $datatoimport) {
 		$array_match_file_to_database = array();
 	}
 
-	// Load source fields in input file
+	// Load the source fields from input file into variable $arrayrecord
 	$fieldssource = array();
 	$result = $obj->import_open_file($conf->import->dir_temp.'/'.$filetoimport, $langs);
 	if ($result >= 0) {
 		// Read first line
 		$arrayrecord = $obj->import_read_record();
-		// Put into array fieldssource starting with 1.
+
+		// Create array $fieldssource starting with 1 with values found of first line.
 		$i = 1;
 		foreach ($arrayrecord as $key => $val) {
 			if ($val["type"] != -1) {
 				$fieldssource[$i]['example1'] = dol_trunc($val['val'], 128);
+				$i++;
+			} else {
+				$fieldssource[$i]['example1'] = $langs->trans('Empty');
 				$i++;
 			}
 		}
@@ -1109,7 +1114,7 @@ if ($step == 4 && $datatoimport) {
 	$height = '32px'; //needs px for css height attribute below
 	$i = 0;
 	$mandatoryfieldshavesource = true;
-	$more = "";
+
 	//var_dump($fieldstarget);
 	//var_dump($optionsall);
 	//exit;
@@ -1175,10 +1180,10 @@ if ($step == 4 && $datatoimport) {
 				$filecolumntoshow = num2Alpha($i);
 			} else {
 				if ($objimport->array_import_convertvalue[0][$tmpcode]['rule'] == 'fetchidfromref') {
-					$htmltext .= $langs->trans("DataComeFromIdFoundFromRef", $filecolumn, $langs->transnoentitiesnoconv($entitylang)).'<br>';
+					$htmltext .= $langs->trans("DataComeFromIdFoundFromRef", $langs->transnoentitiesnoconv($entitylang)).'<br>';
 				}
 				if ($objimport->array_import_convertvalue[0][$tmpcode]['rule'] == 'fetchidfromcodeid') {
-					$htmltext .= $langs->trans("DataComeFromIdFoundFromCodeId", $filecolumn, $langs->transnoentitiesnoconv($objimport->array_import_convertvalue[0][$code]['dict'])).'<br>';
+					$htmltext .= $langs->trans("DataComeFromIdFoundFromCodeId", $langs->transnoentitiesnoconv($objimport->array_import_convertvalue[0][$tmpcode]['dict'])).'<br>';
 				}
 			}
 			// Source required
@@ -1190,9 +1195,9 @@ if ($step == 4 && $datatoimport) {
 				}
 			} else {
 				if ($objimport->array_import_convertvalue[0][$tmpcode]['rule'] == 'fetchidfromref') {
-					$htmltext .= $langs->trans("SourceExample").': <b>'.$langs->transnoentitiesnoconv("ExampleAnyRefFoundIntoElement", $entitylang).($example ? ' ('.$langs->transnoentitiesnoconv("Example").': '.$example.')' : '').'</b><br>';
+					$htmltext .= $langs->trans("SourceExample").': <b>'.$langs->transnoentitiesnoconv("ExampleAnyRefFoundIntoElement", $entitylang).($example ? ' ('.$langs->transnoentitiesnoconv("Example").': '.str_replace('"', '', $example).')' : '').'</b><br>';
 				} elseif ($objimport->array_import_convertvalue[0][$tmpcode]['rule'] == 'fetchidfromcodeid') {
-					$htmltext .= $langs->trans("SourceExample").': <b>'.$langs->trans("ExampleAnyCodeOrIdFoundIntoDictionary", $langs->transnoentitiesnoconv($objimport->array_import_convertvalue[0][$code]['dict'])).($example ? ' ('.$langs->transnoentitiesnoconv("Example").': '.$example.')' : '').'</b><br>';
+					$htmltext .= $langs->trans("SourceExample").': <b>'.$langs->trans("ExampleAnyCodeOrIdFoundIntoDictionary", $langs->transnoentitiesnoconv($objimport->array_import_convertvalue[0][$tmpcode]['dict'])).($example ? ' ('.$langs->transnoentitiesnoconv("Example").': '.str_replace('"', '', $example).')' : '').'</b><br>';
 				} elseif ($example) {
 					$htmltext .= $langs->trans("SourceExample").': <b>'.str_replace('"', '', $example).'</b><br>';
 				}
@@ -1202,7 +1207,8 @@ if ($step == 4 && $datatoimport) {
 				$htmltext .= $langs->trans("FormatControlRule").': <b>'.str_replace('"', '', $objimport->array_import_regex[0][$tmpcode]).'</b><br>';
 			}
 
-			$htmltext .= $langs->trans("Table")."->".$langs->trans("Field").': &nbsp; <b>'.$tablename."->".preg_replace('/^.*\./', '', $tmpcode)."</b>";
+			//var_dump($htmltext);
+			$htmltext .= $langs->trans("InformationOnTargetTables").': &nbsp; <b>'.$tablename."->".preg_replace('/^.*\./', '', $tmpcode)."</b>";
 
 			$labelhtml = $label.' '.$form->textwithpicto('', $htmltext, 1, 'help', '', 1);
 
@@ -1286,7 +1292,7 @@ if ($step == 4 && $datatoimport) {
 	print '</td></tr>';
 
 	// Lines for remark
-	print '<tr class="liste_titre"><td colspan="2">'.$langs->trans("Remark").'</td></tr>';
+	print '<tr class="liste_titre"><td colspan="2">'.$langs->trans("Note").'</td></tr>';
 	print '<tr><td colspan="2"><div id="div-mandatory-target-fields-not-mapped"></div></td></tr>';
 
 	print '</table>';
@@ -1470,8 +1476,8 @@ if ($step == 4 && $datatoimport) {
 		print '</tr>';
 
 		$nameofimportprofile = str_replace(' ', '-', $langs->trans("ImportProfile").' '.$titleofmodule.' '.dol_print_date(dol_now('gmt'), 'dayxcard'));
-		if (is_object($objimport) && !empty($objimport->model_name)) {
-			$nameofimportprofile = $objimport->model_name;
+		if (GETPOST('import_name')) {	// If we have submited a form, we take value used fot the update try
+			$nameofimportprofile = $import_name;
 		}
 
 		print '<tr class="oddeven">';
@@ -1966,9 +1972,9 @@ if ($step == 5 && $datatoimport) {
 
 		print '<div class="center">';
 		print '<span class="opacitymedium">'.$langs->trans("NowClickToRunTheImport", $langs->transnoentitiesnoconv("RunImportFile")).'</span><br>';
-		if (empty($nboferrors)) {
+		/*if (empty($nboferrors)) {
 			print $langs->trans("DataLoadedWithId", $importid).'<br>';
-		}
+		}*/
 		print '</div>';
 
 		print '<br>';

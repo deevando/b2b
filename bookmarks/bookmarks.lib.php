@@ -29,7 +29,7 @@
  */
 function printDropdownBookmarksList()
 {
-	global $conf, $user, $db, $langs;
+	global $conf, $user, $db, $langs, $sortfield, $sortorder;
 
 	require_once DOL_DOCUMENT_ROOT.'/bookmarks/class/bookmark.class.php';
 	require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
@@ -42,13 +42,16 @@ function printDropdownBookmarksList()
 	if (!empty($_SERVER["QUERY_STRING"])) {
 		if (is_array($_GET)) {
 			foreach ($_GET as $key => $val) {
-				if ($val != '') {
-					$url_param[$key]=http_build_query(array(dol_escape_htmltag($key) => dol_escape_htmltag($val)));
+				if (is_array($val)) {
+					foreach ($val as $tmpsubval) {
+						$url_param[] = http_build_query(array(dol_escape_htmltag($key).'[]' => dol_escape_htmltag($tmpsubval)));
+					}
+				} elseif ($val != '') {
+					$url_param[$key] = http_build_query(array(dol_escape_htmltag($key) => dol_escape_htmltag($val)));
 				}
 			}
 		}
 	}
-	global $sortfield, $sortorder;
 	$tmpurl = '';
 	// No urlencode, all param $url will be urlencoded later
 	if ($sortfield) {
@@ -62,10 +65,11 @@ function printDropdownBookmarksList()
 			if ((preg_match('/^search_/', $key) || in_array($key, $authorized_var))
 				&& $val != ''
 				&& !array_key_exists($key, $url_param)) {
-				$url_param[$key]=http_build_query(array(dol_escape_htmltag($key) => dol_escape_htmltag($val)));
+				$url_param[$key] = http_build_query(array(dol_escape_htmltag($key) => dol_escape_htmltag($val)));
 			}
 		}
 	}
+
 	$url .= ($tmpurl ? '?'.$tmpurl : '');
 	if (!empty($url_param)) {
 		$url .= '&'.implode('&', $url_param);

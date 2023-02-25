@@ -143,15 +143,26 @@ function ajax_autocompleter($selected, $htmlname, $url, $urloption = '', $minLen
 												textarea[key] = item[value];
 											});
 										}
-										return { label: label, value: item.value, id: item.key, disabled: item.disabled,
-												 update: update, textarea: textarea,
+
+										console.log("Return value from GET to the rest of code");
+										return { label: label,
+												 value: item.value,
+												 id: item.key,
+												 disabled: item.disabled,
+												 update: update,
+												 textarea: textarea,
 												 pbq: item.pbq,
-												 type: item.type, qty: item.qty, discount: item.discount,
+												 type: item.type,
+												 qty: item.qty,
+												 discount: item.discount,
 												 pricebasetype: item.pricebasetype,
 												 price_ht: item.price_ht,
 												 price_ttc: item.price_ttc,
+												 price_unit_ht: item.price_unit_ht,
+												 price_unit_ht_locale: item.price_unit_ht_locale,
 												 description : item.description,
-												 ref_customer: item.ref_customer }
+												 ref_customer: item.ref_customer,
+												 tva_tx: item.tva_tx }
 									}));
 								} else {
 									console.error("Error: Ajax url '.$url.($urloption ? '?'.$urloption : '').' has returned an empty page. Should be an empty json array.");
@@ -168,13 +179,15 @@ function ajax_autocompleter($selected, $htmlname, $url, $urloption = '', $minLen
 
 							// For supplier price and customer when price by quantity is off
 							$("#'.$htmlnamejquery.'").attr("data-up", ui.item.price_ht);
+							$("#'.$htmlnamejquery.'").attr("data-up-locale", ui.item.price_unit_ht_locale);
 							$("#'.$htmlnamejquery.'").attr("data-base", ui.item.pricebasetype);
 							$("#'.$htmlnamejquery.'").attr("data-qty", ui.item.qty);
 							$("#'.$htmlnamejquery.'").attr("data-discount", ui.item.discount);
 							$("#'.$htmlnamejquery.'").attr("data-description", ui.item.description);
 							$("#'.$htmlnamejquery.'").attr("data-ref-customer", ui.item.ref_customer);
+							$("#'.$htmlnamejquery.'").attr("data-tvatx", ui.item.tva_tx);
 	';
-	if (!empty($conf->global->PRODUIT_CUSTOMER_PRICES_BY_QTY)) {
+	if (!empty($conf->global->PRODUIT_CUSTOMER_PRICES_BY_QTY) || !empty($conf->global->PRODUIT_CUSTOMER_PRICES_BY_QTY_MULTIPRICES)) {
 		$script .= '
 							// For customer price when PRODUIT_CUSTOMER_PRICES_BY_QTY is on
 							$("#'.$htmlnamejquery.'").attr("data-pbq", ui.item.pbq);
@@ -185,6 +198,8 @@ function ajax_autocompleter($selected, $htmlname, $url, $urloption = '', $minLen
 		';
 	}
 	$script .= '
+							// A new value has been selected, we trigger the handlers on #htmlnamejquery
+							console.log("Trigger changes on #'.$htmlnamejquery.'");
 							$("#'.$htmlnamejquery.'").val(ui.item.id).trigger("change");	// Select new value
 
     						// Disable an element

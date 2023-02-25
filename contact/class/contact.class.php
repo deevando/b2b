@@ -1228,6 +1228,15 @@ class Contact extends CommonObject
 
 		$this->db->begin();
 
+		if (!$error && !$notrigger) {
+			// Call trigger
+			$result = $this->call_trigger('CONTACT_DELETE', $user);
+			if ($result < 0) {
+				$error++;
+			}
+			// End call triggers
+		}
+
 		if (!$error) {
 			// Get all rowid of element_contact linked to a type that is link to llx_socpeople
 			$sql = "SELECT ec.rowid";
@@ -1316,15 +1325,6 @@ class Contact extends CommonObject
 			if ($result < 0) {
 				$error++;
 			}
-		}
-
-		if (!$error && !$notrigger) {
-			// Call trigger
-			$result = $this->call_trigger('CONTACT_DELETE', $user);
-			if ($result < 0) {
-				$error++;
-			}
-			// End call triggers
 		}
 
 		if (!$error) {
@@ -1789,6 +1789,8 @@ class Contact extends CommonObject
 		$sql = "SELECT sc.fk_socpeople as id, sc.fk_c_type_contact";
 		$sql .= " FROM ".MAIN_DB_PREFIX."c_type_contact tc";
 		$sql .= ", ".MAIN_DB_PREFIX."societe_contacts sc";
+		$sql .= " INNER JOIN ".MAIN_DB_PREFIX."socpeople sp";
+		$sql .= " ON sc.fk_socpeople = sp.rowid AND sp.statut = 1";
 		$sql .= " WHERE sc.fk_soc =".((int) $this->socid);
 		$sql .= " AND sc.fk_c_type_contact=tc.rowid";
 		$sql .= " AND tc.element = '".$this->db->escape($element)."'";

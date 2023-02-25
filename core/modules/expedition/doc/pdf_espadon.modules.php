@@ -832,7 +832,7 @@ class pdf_espadon extends ModelePdfExpedition
 		$totalToShip = $tmparray['toship'];
 		// Set trueVolume and volume_units not currently stored into database
 		if ($object->trueWidth && $object->trueHeight && $object->trueDepth) {
-			$object->trueVolume = price(($object->trueWidth * $object->trueHeight * $object->trueDepth), 0, $outputlangs, 0, 0);
+			$object->trueVolume = $object->trueWidth * $object->trueHeight * $object->trueDepth;
 			$object->volume_units = $object->size_units * 3;
 		}
 
@@ -846,11 +846,12 @@ class pdf_espadon extends ModelePdfExpedition
 			$totalWeighttoshow = showDimensionInBestUnit($object->trueWeight, $object->weight_units, "weight", $outputlangs);
 		}
 		if ($object->trueVolume) {
-			$totalVolumetoshow = showDimensionInBestUnit($object->trueVolume, $object->volume_units, "volume", $outputlangs);
+			if ($object->volume_units < 50) {
+				$totalVolumetoshow = showDimensionInBestUnit($object->trueVolume, $object->volume_units, "volume", $outputlangs);
+			} else {
+				$totalVolumetoshow =  price($object->trueVolume, 0, $outputlangs, 0, 0).' '.measuringUnitString(0, "volume", $object->volume_units);
+			}
 		}
-
-
-
 
 		if ($this->getColumnStatus('desc')) {
 			$this->printStdColumnContent($pdf, $tab2_top, 'desc', $outputlangs->transnoentities("Total"));
@@ -969,8 +970,16 @@ class pdf_espadon extends ModelePdfExpedition
 		$pdf->SetXY($this->marge_gauche, $posy);
 
 		// Logo
-		$logo = $conf->mycompany->dir_output.'/logos/'.$this->emetteur->logo;
 		if ($this->emetteur->logo) {
+			$logodir = $conf->mycompany->dir_output;
+			if (!empty($conf->mycompany->multidir_output[$object->entity])) {
+				$logodir = $conf->mycompany->multidir_output[$object->entity];
+			}
+			if (empty($conf->global->MAIN_PDF_USE_LARGE_LOGO)) {
+				$logo = $logodir.'/logos/thumbs/'.$this->emetteur->logo_small;
+			} else {
+				$logo = $logodir.'/logos/'.$this->emetteur->logo;
+			}
 			if (is_readable($logo)) {
 				$height = pdf_getHeightForLogo($logo);
 				$pdf->Image($logo, $this->marge_gauche, $posy, 0, $height); // width=0 (auto)

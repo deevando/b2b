@@ -168,6 +168,15 @@ if ($action == 'confirm_refusepropal' && $confirm == 'yes') {
 
 		$message = 'refused';
 		setEventMessages("PropalRefused", null, 'warnings');
+		if (method_exists($object, 'call_trigger')) {
+			// Online customer is not a user, so we use the use that validates the documents
+			$user = new User($db);
+			$user->fetch($object->user_valid_id);
+			$result = $object->call_trigger('PROPAL_CLOSE_REFUSED', $user);
+			if ($result < 0) {
+				$error++;
+			}
+		}
 	} else {
 		$db->rollback();
 	}

@@ -456,8 +456,8 @@ class Reception extends CommonObject
 					$this->brouillon = 1;
 				}
 
-				$file = $conf->reception->dir_output."/".get_exdir($this->id, 2, 0, 0, $this, 'reception')."/".$this->id.".pdf";
-				$this->pdf_filename = $file;
+				//$file = $conf->reception->dir_output."/".get_exdir(0, 0, 0, 1, $this, 'reception')."/".$this->id.".pdf";
+				//$this->pdf_filename = $file;
 
 				// Tracking url
 				$this->getUrlTrackingStatus($obj->tracking_number);
@@ -583,7 +583,7 @@ class Reception extends CommonObject
 
 					$qty = $obj->qty;
 
-					if ($qty <= 0) {
+					if ($qty == 0 || ($qty < 0 && !getDolGlobalInt('RECEPTION_ALLOW_NEGATIVE_QTY'))) {
 						continue;
 					}
 					dol_syslog(get_class($this)."::valid movement index ".$i." ed.rowid=".$obj->rowid." edb.rowid=".$obj->edbrowid);
@@ -1177,6 +1177,8 @@ class Reception extends CommonObject
 				$line = new CommandeFournisseurDispatch($this->db);
 
 				$line->fetch($obj->rowid);
+
+				// TODO Remove or keep this ?
 				$line->fetch_product();
 
 				$sql_commfourndet = 'SELECT qty, ref,  label, description, tva_tx, vat_src_code, subprice, multicurrency_subprice, remise_percent';
@@ -1779,7 +1781,7 @@ class Reception extends CommonObject
 
 							// We decrement stock of product (and sub-products) -> update table llx_product_stock (key of this table is fk_product+fk_entrepot) and add a movement record
 							$inventorycode = '';
-							$result = $mouvS->livraison($user, $obj->fk_product, $obj->fk_entrepot, $qty, $obj->cost_price, $langs->trans("ReceptionUnClassifyCloseddInDolibarr", $numref), $this->db->jdate($obj->eatby), $this->db->jdate($obj->sellby), $obj->batch, '', $obj->fk_origin_stock, $inventorycode);
+							$result = $mouvS->livraison($user, $obj->fk_product, $obj->fk_entrepot, $qty, $obj->cost_price, $langs->trans("ReceptionUnClassifyCloseddInDolibarr", $numref), '', $this->db->jdate($obj->eatby), $this->db->jdate($obj->sellby), $obj->batch, $obj->fk_origin_stock, $inventorycode);
 							if ($result < 0) {
 								$this->error = $mouvS->error;
 								$this->errors = $mouvS->errors;
@@ -1911,7 +1913,7 @@ class Reception extends CommonObject
 
 							// We decrement stock of product (and sub-products) -> update table llx_product_stock (key of this table is fk_product+fk_entrepot) and add a movement record
 							$inventorycode = '';
-							$result = $mouvS->livraison($user, $obj->fk_product, $obj->fk_entrepot, $qty, $obj->cost_price, $langs->trans("ReceptionBackToDraftInDolibarr", $this->ref), $this->db->jdate($obj->eatby), $this->db->jdate($obj->sellby), $obj->batch, '', 0, $inventorycode);
+							$result = $mouvS->livraison($user, $obj->fk_product, $obj->fk_entrepot, $qty, $obj->cost_price, $langs->trans("ReceptionBackToDraftInDolibarr", $this->ref), '', $this->db->jdate($obj->eatby), $this->db->jdate($obj->sellby), $obj->batch, 0, $inventorycode);
 							if ($result < 0) {
 								$this->error = $mouvS->error;
 								$this->errors = $mouvS->errors;

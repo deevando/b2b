@@ -662,8 +662,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 		if (in_array($action, array('consumeorproduce', 'consumeandproduceall'))) {
 			$defaultstockmovementlabel = GETPOST('inventorylabel', 'alphanohtml') ? GETPOST('inventorylabel', 'alphanohtml') : $langs->trans("ProductionForRef", $object->ref);
-			//$defaultstockmovementcode = GETPOST('inventorycode', 'alphanohtml') ? GETPOST('inventorycode', 'alphanohtml') : $object->ref.'_'.dol_print_date(dol_now(), 'dayhourlog');
-			$defaultstockmovementcode = GETPOST('inventorycode', 'alphanohtml') ? GETPOST('inventorycode', 'alphanohtml') : $langs->trans("ProductionForRef", $object->ref);
+			$defaultstockmovementcode = GETPOST('inventorycode', 'alphanohtml') ? GETPOST('inventorycode', 'alphanohtml') : dol_print_date(dol_now(), 'dayhourlog');
 
 			print '<div class="center'.(in_array($action, array('consumeorproduce', 'consumeandproduceall')) ? ' formconsumeproduce' : '').'">';
 			print '<div class="opacitymedium hideonsmartphone paddingbottom">'.$langs->trans("ConfirmProductionDesc", $langs->transnoentitiesnoconv("Confirm")).'<br></div>';
@@ -803,6 +802,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 		// Lines to consume
 
+		$bomcostupdated = 0;	// We will recalculate the unitary cost to produce a product using the real "products to consume into MO"
+
 		if (!empty($object->lines)) {
 			$nblinetoconsume = 0;
 			foreach ($object->lines as $line) {
@@ -821,7 +822,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 					$linecost = price2num($tmpproduct->pmp, 'MT');
 
 					if ($object->qty > 0) {
-						// add free consume line cost to bomcost
+						// add free consume line cost to $bomcostupdated
 						$costprice = price2num((!empty($tmpproduct->cost_price)) ? $tmpproduct->cost_price : $tmpproduct->pmp);
 						if (empty($costprice)) {
 							require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.product.class.php';
@@ -832,12 +833,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 								$costprice = 0;
 							}
 						}
-						$linecost = price2num(($line->qty * $costprice) / $object->qty, 'MT');
-						$bomcost += $linecost;
+						$linecost = price2num(($line->qty * $costprice) / $object->qty, 'MT');	// price for line for all quantities
+						$bomcostupdated += price2num(($line->qty * $costprice) / $object->qty, 'MU');	// same but with full accuracy
 					}
 
-					$bomcost = price2num($bomcost, 'MU');
-
+					$bomcostupdated = price2num($bomcostupdated, 'MU');
 					$arrayoflines = $object->fetchLinesLinked('consumed', $line->id);
 					$alreadyconsumed = 0;
 					foreach ($arrayoflines as $line2) {
@@ -1008,6 +1008,9 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 							$disable = 'disabled';
 						}
 
+						// input hidden with fk_product of line
+						print '<input type="hidden" name="product-'.$line->id.'-'.$i.'" value="'.$line->fk_product.'">';
+
 						// Qty
 						print '<td class="right"><input type="text" class="width50 right" id="qtytoconsume-'.$line->id.'-'.$i.'" name="qty-'.$line->id.'-'.$i.'" value="'.$preselected.'" '.$disable.'></td>';
 
@@ -1109,7 +1112,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		print '<td>'.$langs->trans("Product").'</td>';
 		print '<td class="right">'.$langs->trans("Qty").'</td>';
 		if ($permissiontoupdatecost) {
-			if (empty($bomcost)) {
+			if (empty($bomcostupdated)) {
 				print '<td class="right">'.$form->textwithpicto($langs->trans("UnitCost"), $langs->trans("AmountUsedToUpdateWAP")).'</td>';
 			} else {
 				print '<td class="right">'.$form->textwithpicto($langs->trans("ManufacturingPrice"), $langs->trans("AmountUsedToUpdateWAP")).'</td>';
@@ -1197,17 +1200,25 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 					if ($permissiontoupdatecost) {
 						// Defined $manufacturingcost
 						$manufacturingcost = 0;
-						if ($object->mrptype == 0) {	// If MO is a "Manufacture" type (and not "Disassemble"
-							$manufacturingcost = $bomcost;
+						$manufacturingcostsrc = '';
+						if ($object->mrptype == 0) {	// If MO is a "Manufacture" type (and not "Disassemble")
+							$manufacturingcost = $bomcostupdated;
+							$manufacturingcostsrc = $langs->trans("CalculatedFromProductsToConsume");
+							if (empty($manufacturingcost)) {
+								$manufacturingcost = $bomcost;
+								$manufacturingcostsrc = $langs->trans("ValueFromBom");
+							}
 							if (empty($manufacturingcost)) {
 								$manufacturingcost = price2num($tmpproduct->cost_price, 'MU');
+								$manufacturingcostsrc = $langs->trans("CostPrice");
 							}
 							if (empty($manufacturingcost)) {
 								$manufacturingcost = price2num($tmpproduct->pmp, 'MU');
+								$manufacturingcostsrc = $langs->trans("PMPValue");
 							}
 						}
 
-						print '<td class="right nowraponall">';
+						print '<td class="right nowraponall" title="'.dol_escape_htmltag($manufacturingcostsrc).'">';
 						if ($manufacturingcost) {
 							print price($manufacturingcost);
 						}
@@ -1304,19 +1315,27 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 						if ($permissiontoupdatecost) {
 							// Defined $manufacturingcost
 							$manufacturingcost = 0;
-							if ($object->mrptype == 0) {	// If MO is a "Manufacture" type (and not "Disassemble"
-								$manufacturingcost = $bomcost;
+							$manufacturingcostsrc = '';
+							if ($object->mrptype == 0) {	// If MO is a "Manufacture" type (and not "Disassemble")
+								$manufacturingcost = $bomcostupdated;
+								$manufacturingcostsrc = $langs->trans("CalculatedFromProductsToConsume");
+								if (empty($manufacturingcost)) {
+									$manufacturingcost = $bomcost;
+									$manufacturingcostsrc = $langs->trans("ValueFromBom");
+								}
 								if (empty($manufacturingcost)) {
 									$manufacturingcost = price2num($tmpproduct->cost_price, 'MU');
+									$manufacturingcostsrc = $langs->trans("CostPrice");
 								}
 								if (empty($manufacturingcost)) {
 									$manufacturingcost = price2num($tmpproduct->pmp, 'MU');
+									$manufacturingcostsrc = $langs->trans("PMPValue");
 								}
 							}
 
 							if ($tmpproduct->type == Product::TYPE_PRODUCT || !empty($conf->global->STOCK_SUPPORTS_SERVICES)) {
 								$preselected = (GETPOSTISSET('pricetoproduce-'.$line->id.'-'.$i) ? GETPOST('pricetoproduce-'.$line->id.'-'.$i) : ($manufacturingcost ? price($manufacturingcost) : ''));
-								print '<td class="right"><input type="text" class="width50 right" name="pricetoproduce-'.$line->id.'-'.$i.'" value="'.$preselected.'"></td>';
+								print '<td class="right"><input type="text" class="width75 right" name="pricetoproduce-'.$line->id.'-'.$i.'" value="'.$preselected.'"></td>';
 							} else {
 								print '<td><input type="hidden" class="width50 right" name="pricetoproduce-'.$line->id.'-'.$i.'" value="'.($manufacturingcost ? $manufacturingcost : '').'"></td>';
 							}

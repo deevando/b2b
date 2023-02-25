@@ -1173,6 +1173,8 @@ class SupplierProposal extends CommonObject
 				$action = '';
 				$reshook = $hookmanager->executeHooks('createFrom', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
 				if ($reshook < 0) {
+					$this->errors += $hookmanager->errors;
+					$this->error = $hookmanager->error;
 					$error++;
 				}
 			}
@@ -2947,7 +2949,7 @@ class SupplierProposalLine extends CommonObjectLine
 			$this->product_label	= $objp->product_label;
 			$this->product_desc		= $objp->product_desc;
 
-			$this->ref_fourn = $objp->ref_produit_forun;
+			$this->ref_fourn = $objp->ref_produit_fourn;
 
 			// Multicurrency
 			$this->fk_multicurrency = $objp->fk_multicurrency;

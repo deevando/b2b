@@ -4967,7 +4967,7 @@ abstract class CommonObject
 
 					$prod = new Product($this->db);
 					$prod->fetch($line->fk_product);
-
+					
 					$outputlangs = $langs;
 					$newlang = '';
 					if (empty($newlang) && GETPOST('lang_id', 'aZ09')) {
@@ -4980,7 +4980,7 @@ abstract class CommonObject
 						$outputlangs = new Translate("", $conf);
 						$outputlangs->setDefaultLang($newlang);
 					}
-
+					$product_static->load_stock();
 					$label = (!empty($prod->multilangs[$outputlangs->defaultlang]["label"])) ? $prod->multilangs[$outputlangs->defaultlang]["label"] : $line->product_label;
 				} else {
 					$label = $line->product_label;

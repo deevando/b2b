@@ -328,7 +328,7 @@ if (empty($reshook)) {
 			$qty = "qtyl".$i;
 
 			//reception line for product with no batch management and no multiple stock location
-			if (GETPOST($qty, 'alpha') > 0) {
+			if (GETPOST($qty, 'alpha') <> 0) {
 				$totalqty += price2num(GETPOST($qty, 'alpha'), 'MS');
 			}
 
@@ -337,7 +337,7 @@ if (empty($reshook)) {
 		}
 
 
-		if ($totalqty > 0) {  // There is at least one thing to ship
+		if ($totalqty <> 0) {  // There is at least one thing to ship
 			for ($i = 1; $i <= $num; $i++) {
 				$lineToTest = '';
 				$lineId = GETPOST($idl, 'int');
@@ -359,7 +359,7 @@ if (empty($reshook)) {
 				$batch = "batch".$i;
 				$cost_price = "cost_price".$i;
 
-				if (GETPOST($qty, 'int') > 0 || (GETPOST($qty, 'int') == 0 && $conf->global->RECEPTION_GETS_ALL_ORDER_PRODUCTS)) {
+				if (GETPOST($qty, 'int') <> 0 || (GETPOST($qty, 'int') == 0 && $conf->global->RECEPTION_GETS_ALL_ORDER_PRODUCTS)) {
 					$ent = "entl".$i;
 
 					$idl = "idl".$i;

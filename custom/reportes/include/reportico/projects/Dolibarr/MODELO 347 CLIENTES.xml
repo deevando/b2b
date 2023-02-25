@@ -1,0 +1,35 @@
+<?xml version="1.0"?><Report><ReportQuery><Format><ReportTitle>MODELO 347 CLIENTES</ReportTitle><ReportDescription></ReportDescription><PageSize>.DEFAULT</PageSize><PageOrientation>.DEFAULT</PageOrientation><PageFreezeColumns></PageFreezeColumns><TopMargin></TopMargin><BottomMargin></BottomMargin><RightMargin></RightMargin><LeftMargin></LeftMargin><AutoPaginate></AutoPaginate><PdfZoomFactor></PdfZoomFactor><HtmlZoomFactor></HtmlZoomFactor><PageTitleDisplay></PageTitleDisplay><PageLayout></PageLayout><pdfFont></pdfFont><pdfFontSize></pdfFontSize><PreExecuteCode>NONE</PreExecuteCode><formBetweenRows>solidline</formBetweenRows><gridDisplay>show</gridDisplay><gridSortable>yes</gridSortable><gridSearchable>yes</gridSearchable><gridPageable>.DEFAULT</gridPageable><gridPageSize>.DEFAULT</gridPageSize></Format><Datasource><SourceType>database</SourceType><SourceConnection></SourceConnection></Datasource><EntryForm><Query><TableSql></TableSql><WhereSql></WhereSql><GroupSql></GroupSql><RowSelection>all</RowSelection><SQL><QuerySql></QuerySql><SQLRaw>WITH anual AS (
+SELECT 
+    s.nom as nombre_cliente,
+    SUM(f.total_ttc) as total_facturado
+FROM 
+    llxas_facture f
+    JOIN llxas_societe s ON f.fk_soc = s.rowid
+WHERE 
+    f.fk_statut &gt; 0
+    AND YEAR(f.datef) = 2022
+GROUP BY 
+    s.nom
+HAVING 
+    SUM(f.total_ttc) &gt;= 3005.06
+)
+
+SELECT
+    QUARTER(f.datef) AS trimestre,
+    YEAR(f.datef) AS Ano,
+    s.siren,
+    s.nom as nombre_cliente,
+    CONCAT(' ',FORMAT(SUM(f.total_ttc), 2,'es_ES'), ' €') as Total_Ventas
+FROM 
+    llxas_facture f
+    JOIN llxas_societe s ON f.fk_soc = s.rowid
+    JOIN anual a ON s.nom = a.nombre_cliente
+WHERE 
+    f.fk_statut &gt; 0
+    AND YEAR(f.datef) = 2022
+GROUP BY 
+    s.nom,
+    trimestre
+ORDER BY 
+        trimestre,
+	s.nom</SQLRaw></SQL><QueryColumns><QueryColumn><Name>trimestre</Name><TableName></TableName><ColumnName>QUARTER(f.datef) AS</ColumnName><ColumnType>char</ColumnType><ColumnLength>30</ColumnLength><Format><column_display>show</column_display><content_type>plain</content_type><ColumnStartPDF></ColumnStartPDF><justify>left</justify><ColumnWidthPDF></ColumnWidthPDF><ColumnWidthHTML></ColumnWidthHTML><column_title></column_title><tooltip></tooltip><group_header_label>0</group_header_label><group_header_label_xpos></group_header_label_xpos><group_header_data_xpos></group_header_data_xpos><group_trailer_label>0</group_trailer_label></Format></QueryColumn><QueryColumn><Name>Ano</Name><TableName></TableName><ColumnName>YEAR(f.datef) AS</ColumnName><ColumnType>char</ColumnType><ColumnLength>30</ColumnLength><Format><column_display>show</column_display><content_type>plain</content_type><ColumnStartPDF></ColumnStartPDF><justify>left</justify><ColumnWidthPDF></ColumnWidthPDF><ColumnWidthHTML></ColumnWidthHTML><column_title></column_title><tooltip></tooltip><group_header_label>0</group_header_label><group_header_label_xpos></group_header_label_xpos><group_header_data_xpos></group_header_data_xpos><group_trailer_label>0</group_trailer_label></Format></QueryColumn><QueryColumn><Name>siren</Name><TableName>s</TableName><ColumnName>siren</ColumnName><ColumnType>char</ColumnType><ColumnLength>30</ColumnLength><Format><column_display>show</column_display><content_type>plain</content_type><ColumnStartPDF></ColumnStartPDF><justify>left</justify><ColumnWidthPDF></ColumnWidthPDF><ColumnWidthHTML></ColumnWidthHTML><column_title></column_title><tooltip></tooltip><group_header_label>0</group_header_label><group_header_label_xpos></group_header_label_xpos><group_header_data_xpos></group_header_data_xpos><group_trailer_label>0</group_trailer_label></Format></QueryColumn><QueryColumn><Name>nombre_cliente</Name><TableName></TableName><ColumnName>s.nom as</ColumnName><ColumnType>char</ColumnType><ColumnLength>30</ColumnLength><Format><column_display>show</column_display><content_type>plain</content_type><ColumnStartPDF></ColumnStartPDF><justify>left</justify><ColumnWidthPDF></ColumnWidthPDF><ColumnWidthHTML></ColumnWidthHTML><column_title></column_title><tooltip></tooltip><group_header_label>0</group_header_label><group_header_label_xpos></group_header_label_xpos><group_header_data_xpos></group_header_data_xpos><group_trailer_label>0</group_trailer_label></Format></QueryColumn><QueryColumn><Name>Total_Ventas</Name><TableName></TableName><ColumnName>CONCAT(' ',FORMAT(SUM(f.total_ttc), 2,'es_ES'), ' €') as</ColumnName><ColumnType>char</ColumnType><ColumnLength>30</ColumnLength><Format><column_display>show</column_display><content_type>plain</content_type><ColumnStartPDF></ColumnStartPDF><justify>left</justify><ColumnWidthPDF></ColumnWidthPDF><ColumnWidthHTML></ColumnWidthHTML><column_title></column_title><tooltip></tooltip><group_header_label>0</group_header_label><group_header_label_xpos></group_header_label_xpos><group_header_data_xpos></group_header_data_xpos><group_trailer_label>0</group_trailer_label></Format></QueryColumn></QueryColumns><OrderColumns></OrderColumns><PreSQLS><PreSQL><SQLText>-- Enter SQL</SQLText></PreSQL></PreSQLS></Query><Assignments></Assignments><Criteria></Criteria><Output><PageHeaders></PageHeaders><PageFooters></PageFooters><DisplayOrders><DisplayOrder><ColumnName>trimestre</ColumnName><OrderNumber>1</OrderNumber></DisplayOrder><DisplayOrder><ColumnName>Ano</ColumnName><OrderNumber>2</OrderNumber></DisplayOrder><DisplayOrder><ColumnName>siren</ColumnName><OrderNumber>3</OrderNumber></DisplayOrder><DisplayOrder><ColumnName>nombre_cliente</ColumnName><OrderNumber>4</OrderNumber></DisplayOrder><DisplayOrder><ColumnName>Total_Ventas</ColumnName><OrderNumber>5</OrderNumber></DisplayOrder></DisplayOrders><Groups></Groups><Graphs></Graphs></Output></EntryForm></ReportQuery></Report>
